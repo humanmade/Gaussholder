@@ -68,29 +68,14 @@ class Gradient_Placeholder {
 
 		global $post;
 
-		$images = get_posts(
-			array(
-				'post_parent' => $post->ID,
-				'post_status' => 'any',
-				'post_type'   => 'attachment',
-				'posts_per_page' => -1,
-				'post_mime_type' => 'image',
-			)
-		);
+		$images = $this->get_all_images();
 
 		$this->generate_style( $images );
 	 }
 
 	protected function generate_style( $images ) {
 
-		$style = '<style>background:';
-		foreach ( $images as $image ) {
-			$colors = get_post_meta( $image->ID, 'image_colors', true );
-			$style .= 'linear-gradient(90deg, rgba(237,202,216,0) 0%, rgba(237,202,216,1) 100%, rgba(237,202,216,1) 100%)';
-		}
-get_media_embedded_in_content();
-		$style .= '</style>';
-		echo $style;
+		// generate a <style> tag
 	}
 
 	protected function save_colors_for_attachment( $id, $image_path ) {
