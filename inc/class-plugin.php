@@ -1,4 +1,4 @@
-<?php
+<?php namespace HMImagePlaceholders;
 
 namespace HM_Image_Placeholder;
 
@@ -62,7 +62,20 @@ class Plugin {
 			return $attr;
 		}
 
-		foreach ( $colors_hex as $hex ) {
+		$display_type = get_site_option( 'hmip_placeholder_type' );
+
+		if ( 'gradient' === $display_type ) {
+			$attr['style'] = $this->get_gradient_style( $colors_hex );
+		} else {
+			$attr['style'] = $this->get_solid_style( $colors_hex );
+		}
+
+		return $attr;
+	}
+
+	public function get_gradient_style( $hex_colors ) {
+
+		foreach ( $hex_colors as $hex ) {
 			$colors[] = implode( ',', $this->hex2rgb( $hex ) ) . ',0';
 			$colors[] = implode( ',', $this->hex2rgb( $hex ) ) . ',1';
 		}
@@ -76,9 +89,12 @@ class Plugin {
 
 		$style = 'background:' . implode( $gradients, ', ' ) . ';';
 
-		$attr['style'] = $style;
+		return $style;
+	}
 
-		return $attr;
+	public function get_solid_style( $colors ) {
+
+		return 'background:' . reset( $colors ) . ';';
 	}
 
 	/**

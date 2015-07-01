@@ -26,3 +26,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 Plugin::get_instance();
+
+if ( is_admin() ) {
+	require_once __DIR__ . '/inc/class-hm-image-placeholders-admin.php';
+	HM_Image_Placeholders_Admin::get_instance();
+}
+
+HM_Image_Placeholders::get_instance();
