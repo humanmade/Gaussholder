@@ -13,6 +13,8 @@ class HM_Image_Placeholders {
 	private static $instance;
 
 	/**
+	 * Creates and returns a singleton instance of the class.
+	 *
 	 * @return Gradient_Placeholder
 	 */
 	public static function get_instance() {
@@ -25,14 +27,14 @@ class HM_Image_Placeholders {
 	}
 
 	/**
-	 *
+	 * Initialize the plugin.
 	 */
 	public function init() {
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
 	}
 
 	/**
-	 *
+	 * Set up hooked callbacks on plugins_loaded
 	 */
 	public function plugins_loaded() {
 
@@ -41,6 +43,15 @@ class HM_Image_Placeholders {
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'filter_wp_get_attachment_image_attributes' ), 10, 3 );
 	}
 
+	/**
+	 * Adds a style attribute to image HTML.
+	 *
+	 * @param $attr
+	 * @param $attachment
+	 * @param $size
+	 *
+	 * @return mixed
+	 */
 	function filter_wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
 
 		$colors_hex = get_post_meta( $attachment->ID, 'hmgp_image_colors', true );
@@ -81,12 +92,14 @@ class HM_Image_Placeholders {
 
 		$image = $client->loadJpeg( $image_path );
 
-// Get three most used color hex code
+		// Get three most used color hex code
 		return $image->extract( 4 );
 
 	}
 
 	/**
+	 * Save extracted colors to image metadata
+	 *
 	 * @param $metadata
 	 * @param $attachment_id
 	 *
@@ -104,7 +117,8 @@ class HM_Image_Placeholders {
 	}
 
 	/**
-	 * 
+	 * Extract the colors from the image
+	 *
 	 * @param $id
 	 * @param $image_path
 	 */
@@ -118,6 +132,8 @@ class HM_Image_Placeholders {
 	}
 
 	/**
+	 * Converts a hex color to RGB.
+	 * 
 	 * @param $hex
 	 *
 	 * @return array
