@@ -13,7 +13,16 @@ Domain Path: /languages
 Network: true
  */
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/inc/class-hm-image-placeholders.php';
+namespace HM_Image_Placeholder;
 
-HM_Image_Placeholders::get_instance();
+use WP_CLI;
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/inc/class-plugin.php';
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once __DIR__  . '/inc/class-wp-cli-command.php';
+	WP_CLI::add_command( 'hm-image-placeholder', 'HM_Image_Placeholder\\WP_CLI_Command' );
+}
+
+Plugin::get_instance();
