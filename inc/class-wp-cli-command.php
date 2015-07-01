@@ -10,7 +10,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 	 * Regenerate image color data for a single attachment.
 	 *
 	 * @subcommand regenerate
-	 * @synopsis <id>... [--dry-run] [--verbose]
+	 * @synopsis <id> [--dry-run] [--verbose]
 	 */
 	public function regenerate( $args, $args_assoc ) {
 
@@ -33,7 +33,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 		}
 
 		if ( $args_assoc['verbose'] ) {
-			WP_CLI::line( sprintf( 'Updated caclulated colors for attachment %d.', $id ) );
+			WP_CLI::line( sprintf( 'Updated caclulated colors for attachment %d.', $attachment_id ) );
 		}
 
 	}
@@ -49,7 +49,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 		$args_assoc = wp_parse_args( $args_assoc, array(
 			'count'   => 1,
 			'offset'  => 0,
-			'dry_run' => false,
+			'dry-run' => false,
 		) );
 
 		if ( empty( $page ) ) {
@@ -81,7 +81,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 
 				$this->regenerate(
 					array( $post_id ),
-					array( 'verbose' => false, 'dry-run' => $args_assoc['dry_run'] )
+					array( 'verbose' => false, 'dry-run' => $args_assoc['dry-run'] )
 				);
 			}
 
