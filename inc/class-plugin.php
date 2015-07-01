@@ -1,11 +1,13 @@
 <?php
 
+namespace HM_Image_Placeholder;
+
 use League\ColorExtractor\Client as ColorExtractor;
 
 /**
  * Class Gradient_Placeholder
  */
-class HM_Image_Placeholders {
+class Plugin {
 
 	/**
 	 * @var
@@ -18,8 +20,8 @@ class HM_Image_Placeholders {
 	 * @return Gradient_Placeholder
 	 */
 	public static function get_instance() {
-		if ( ! ( self::$instance instanceof HM_Image_Placeholders ) ) {
-			self::$instance = new HM_Image_Placeholders();
+		if ( ! ( self::$instance instanceof Plugin ) ) {
+			self::$instance = new Plugin();
 			self::$instance->init();
 		}
 
@@ -54,7 +56,7 @@ class HM_Image_Placeholders {
 	 */
 	function filter_wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
 
-		$colors_hex = get_post_meta( $attachment->ID, 'hmgp_image_colors', true );
+		$colors_hex = $this->get_colors_for_attachment( $id );
 
 		if ( ! $colors_hex ) {
 			return $attr;
@@ -107,13 +109,22 @@ class HM_Image_Placeholders {
 	 */
 	public function filter_wp_generate_attachment_metadata( $metadata, $attachment_id ) {
 
-		$upload_path = wp_upload_dir();
-
-		$thumbnail_path = $upload_path['basedir'] . '/' . $metadata['file'];
-
-		$this->save_colors_for_attachment( $attachment_id, $thumbnail_path );
+		$colors = $this->calculate_colors_for_attachment( $attachment_id );
+		$this->save_colors_for_attachment( $attachment_id, $colors );
 
 		return $metadata;
+	}
+
+	/**
+	 * Get the stored colors for the image
+	 *
+	 * @param $id
+	 * @param array $hex_colors
+	 */
+	public function get_colors_for_attachment( $id ) {
+
+		return get_post_meta( $attachment->ID, 'hmgp_image_colors', true );
+
 	}
 
 	/**
@@ -122,18 +133,33 @@ class HM_Image_Placeholders {
 	 * @param $id
 	 * @param $image_path
 	 */
-	protected function save_colors_for_attachment( $id, $image_path ) {
-
-		if ( get_post_meta( $id, 'hmgp_image_colors', true ) ) {
-			return;
-		}
-		$colors = $this->extract_colors( $image_path );
+	public function save_colors_for_attachment( $id, $colors = array() ) {
 		update_post_meta( $id, 'hmgp_image_colors', $colors );
 	}
 
 	/**
+	 * Calculate the colors from the image
+	 *
+	 * @param $id
+	 * @param $image_path
+	 */
+	public function calculate_colors_for_attachment( $id ) {
+
+		$img     = wp_get_attachment_image_src( $id, 'thumbnail' );
+		$uploads = wp_upload_dir();
+		$path    = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
+
+		if ( get_post_meta( $id, 'hmgp_image_colors', true ) ) {
+			return;
+		}
+
+		return $this->extract_colors( $path );
+
+	}
+
+	/**
 	 * Converts a hex color to RGB.
-	 * 
+	 *
 	 * @param $hex
 	 *
 	 * @return array
@@ -152,7 +178,6 @@ class HM_Image_Placeholders {
 		}
 		$rgb = array( $r, $g, $b );
 
-		//return implode(",", $rgb); // returns the rgb values separated by commas
 		return $rgb; // returns an array with the rgb values
 	}
 
