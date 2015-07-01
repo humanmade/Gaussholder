@@ -52,7 +52,7 @@ class HM_Image_Placeholders {
 
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'filter_wp_generate_attachment_metadata' ), 10, 2 );
 
-		//add_filter( 'image_send_to_editor', array( $this, 'filter_image_send_to_editor' ), 10, 8 );
+		add_filter( 'image_send_to_editor', array( $this, 'filter_image_send_to_editor' ), 10, 8 );
 
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'filter_wp_get_attachment_image_attributes' ), 10, 3 );
 	}
