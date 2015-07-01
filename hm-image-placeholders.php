@@ -32,4 +32,4 @@ if ( is_admin() ) {
 	HM_Image_Placeholders_Admin::get_instance();
 }
 
-HM_Image_Placeholders::get_instance();
+Plugin::get_instance();

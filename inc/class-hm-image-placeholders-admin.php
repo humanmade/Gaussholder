@@ -1,4 +1,6 @@
-<?php namespace HMImagePlaceholders;
+<?php
+
+namespace HM_Image_Placeholder;
 
 class HM_Image_Placeholders_Admin {
 

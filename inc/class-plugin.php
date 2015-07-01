@@ -1,4 +1,4 @@
-<?php namespace HMImagePlaceholders;
+<?php
 
 namespace HM_Image_Placeholder;
 
@@ -56,7 +56,7 @@ class Plugin {
 	 */
 	function filter_wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
 
-		$colors_hex = $this->get_colors_for_attachment( $id );
+		$colors_hex = $this->get_colors_for_attachment( $attachment->ID );
 
 		if ( ! $colors_hex ) {
 			return $attr;
@@ -139,7 +139,7 @@ class Plugin {
 	 */
 	public function get_colors_for_attachment( $id ) {
 
-		return get_post_meta( $attachment->ID, 'hmgp_image_colors', true );
+		return get_post_meta( $id, 'hmgp_image_colors', true );
 
 	}
 
