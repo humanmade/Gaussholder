@@ -43,6 +43,43 @@ class Plugin {
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'filter_wp_generate_attachment_metadata' ), 10, 2 );
 
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'filter_wp_get_attachment_image_attributes' ), 10, 3 );
+
+		add_filter( 'image_send_to_editor', array( $this, 'filter_image_send_to_editor' ), 10, 8 );
+	}
+
+	/**
+	 * Adds the style attribute to the image HTML.
+	 * 
+	 * @param $html
+	 * @param $id
+	 * @param $caption
+	 * @param $title
+	 * @param $align
+	 * @param $url
+	 * @param $size
+	 * @param $alt
+	 *
+	 * @return mixed
+	 */
+	public function filter_image_send_to_editor( $html, $id, $caption, $title, $align, $url, $size, $alt ) {
+
+		$colors_hex = $this->get_colors_for_attachment( $id );
+
+		if ( ! $colors_hex ) {
+			return $html;
+		}
+
+		$display_type = get_site_option( 'hmip_placeholder_type' );
+
+		if ( 'gradient' === $display_type ) {
+			$style = $this->get_gradient_style( $colors_hex );
+		} else {
+			$style = $this->get_solid_style( $colors_hex );
+		}
+
+		$html = preg_replace( '/<img/', '<img style="' . $style . '" ', $html );
+
+		return $html;
 	}
 
 	/**
@@ -54,7 +91,7 @@ class Plugin {
 	 *
 	 * @return mixed
 	 */
-	function filter_wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
+	public function filter_wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
 
 		$colors_hex = $this->get_colors_for_attachment( $attachment->ID );
 
@@ -73,6 +110,13 @@ class Plugin {
 		return $attr;
 	}
 
+	/**
+	 * Style attribute for gradient background.
+	 *
+	 * @param $hex_colors
+	 *
+	 * @return string
+	 */
 	public function get_gradient_style( $hex_colors ) {
 
 		foreach ( $hex_colors as $hex ) {
@@ -84,7 +128,7 @@ class Plugin {
 		$gradient_angles = array( '90', '0', '-90', '-180' );
 
 		foreach ( $gradient_angles as $key => $gradient_angle ) {
-			$gradients[] = sprintf( "linear-gradient(%sdeg, rgba(%s) 0%%, rgba(%s) 100%%, rgba(%s))", $gradient_angle, $colors[ $key ], $colors[ $key + 1 ], $colors[ $key + 1 ] );
+			$gradients[] = sprintf( "linear-gradient(%sdeg, rgba(%s) 0%%, rgba(%s) 100%%, rgba(%s) 100%%)", $gradient_angle, $colors[ $key ], $colors[ $key + 1 ], $colors[ $key + 1 ] );
 		}
 
 		$style = 'background:' . implode( $gradients, ', ' ) . ';';
@@ -92,6 +136,13 @@ class Plugin {
 		return $style;
 	}
 
+	/**
+	 * Style attribute for solid backgrounds.
+	 *
+	 * @param $colors
+	 *
+	 * @return string
+	 */
 	public function get_solid_style( $colors ) {
 
 		return 'background:' . reset( $colors ) . ';';
@@ -133,9 +184,9 @@ class Plugin {
 
 	/**
 	 * Get the stored colors for the image
-	 *
 	 * @param $id
-	 * @param array $hex_colors
+	 *
+	 * @return mixed
 	 */
 	public function get_colors_for_attachment( $id ) {
 
@@ -147,7 +198,7 @@ class Plugin {
 	 * Extract the colors from the image
 	 *
 	 * @param $id
-	 * @param $image_path
+	 * @param array $colors
 	 */
 	public function save_colors_for_attachment( $id, $colors = array() ) {
 		update_post_meta( $id, 'hmgp_image_colors', $colors );
@@ -157,7 +208,8 @@ class Plugin {
 	 * Calculate the colors from the image
 	 *
 	 * @param $id
-	 * @param $image_path
+	 *
+	 * @return array|void
 	 */
 	public function calculate_colors_for_attachment( $id ) {
 
