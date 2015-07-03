@@ -36,7 +36,6 @@ class WP_CLI_Command extends \WP_CLI_Command {
 
 		if ( ! $args_assoc['dry-run'] ) {
 
-
 			$plugin->save_colors_for_attachment(
 				$attachment_id,
 				$plugin->calculate_colors_for_attachment( $attachment_id )
@@ -97,7 +96,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 					array(
 						'verbose' => false,
 						'dry-run' => $args_assoc['dry-run'],
-						'regenerate' => $args_assoc['dry-run']
+						'regenerate' => $args_assoc['regenerate']
 					)
 				);
 
