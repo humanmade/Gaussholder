@@ -7,23 +7,34 @@ use WP_CLI, cli, WP_Query;
 class WP_CLI_Command extends \WP_CLI_Command {
 
 	/**
-	 * Regenerate image color data for a single attachment.
+	 * Calculate image color data for a single attachment.
 	 *
-	 * @subcommand regenerate
-	 * @synopsis <id> [--dry-run] [--verbose]
+	 * @subcommand process
+	 * @synopsis <id> [--dry-run] [--verbose] [--regenerate]
 	 */
-	public function regenerate( $args, $args_assoc ) {
+	public function process( $args, $args_assoc ) {
 
 		$args_assoc = wp_parse_args( $args_assoc, array(
-			'verbose' => true,
-			'dry-run' => false,
+			'verbose'    => true,
+			'dry-run'    => false,
+			'regenerate' => false,
 		) );
 
+		$plugin        = Plugin::get_instance();
 		$attachment_id = absint( $args[0] );
 
-		if ( ! $args_assoc['dry-run'] ) {
+		// Unless regenerating, skip attachments that already have data.
+		if ( ! $args_assoc['regenerate'] && $plugin->calculate_colors_for_attachment( $attachment_id ) ) {
 
-			$plugin = Plugin::get_instance();
+			if ( $args_assoc['verbose'] ) {
+				WP_CLI::line( sprintf( 'Skipping attachment %d. Data already exists.', $attachment_id ) );
+			}
+
+			return;
+
+		}
+
+		if ( ! $args_assoc['dry-run'] ) {
 
 			$plugin->save_colors_for_attachment(
 				$attachment_id,
@@ -39,17 +50,18 @@ class WP_CLI_Command extends \WP_CLI_Command {
 	}
 
 	/**
-	 * Regenerate image color data for all attachments.
+	 * Process image color data for all attachments.
 	 *
-	 * @subcommand regenerate-all
-	 * @synopsis [--dry-run] [--count=<int>] [--offset=<int>]
+	 * @subcommand process-all
+	 * @synopsis [--dry-run] [--count=<int>] [--offset=<int>] [--regenerate]
 	 */
-	public function _regenerate_all( $args, $args_assoc ) {
+	public function process_all( $args, $args_assoc ) {
 
 		$args_assoc = wp_parse_args( $args_assoc, array(
-			'count'   => 1,
-			'offset'  => 0,
-			'dry-run' => false,
+			'count'      => 1,
+			'offset'     => 0,
+			'dry-run'    => false,
+			'regenerate' => false,
 		) );
 
 		if ( empty( $page ) ) {
@@ -71,7 +83,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 			) );
 
 			if ( empty( $progress_bar ) ) {
-				$progress_bar = new cli\progress\Bar( sprintf( 'Regenerating image color data for %d', absint( $query->found_posts ) ), absint( $query->found_posts ), 100 );
+				$progress_bar = new cli\progress\Bar( sprintf( 'Processing images', absint( $query->found_posts ) ), absint( $query->found_posts ), 100 );
 				$progress_bar->display();
 			}
 
@@ -79,10 +91,15 @@ class WP_CLI_Command extends \WP_CLI_Command {
 
 				$progress_bar->tick();
 
-				$this->regenerate(
+				$this->process(
 					array( $post_id ),
-					array( 'verbose' => false, 'dry-run' => $args_assoc['dry-run'] )
+					array(
+						'verbose' => false,
+						'dry-run' => $args_assoc['dry-run'],
+						'regenerate' => $args_assoc['regenerate']
+					)
 				);
+
 			}
 
 			if ( $query->get('paged') >= $query->max_num_pages ) {
