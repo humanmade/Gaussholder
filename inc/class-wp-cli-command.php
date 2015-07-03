@@ -51,7 +51,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 	}
 
 	/**
-	 * Regenerate image color data for all attachments.
+	 * Process image color data for all attachments.
 	 *
 	 * @subcommand process-all
 	 * @synopsis [--dry-run] [--count=<int>] [--offset=<int>] [--regenerate]
