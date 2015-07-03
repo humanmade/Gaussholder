@@ -49,7 +49,7 @@ class Plugin {
 
 	/**
 	 * Adds the style attribute to the image HTML.
-	 * 
+	 *
 	 * @param $html
 	 * @param $id
 	 * @param $caption
@@ -216,10 +216,6 @@ class Plugin {
 		$img     = wp_get_attachment_image_src( $id, 'thumbnail' );
 		$uploads = wp_upload_dir();
 		$path    = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
-
-		if ( get_post_meta( $id, 'hmgp_image_colors', true ) ) {
-			return;
-		}
 
 		return $this->extract_colors( $path );
 
