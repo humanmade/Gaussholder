@@ -49,7 +49,7 @@ class Plugin {
 
 	/**
 	 * Adds the style attribute to the image HTML.
-	 * 
+	 *
 	 * @param $html
 	 * @param $id
 	 * @param $caption
@@ -162,7 +162,7 @@ class Plugin {
 		$image = $client->loadJpeg( $image_path );
 
 		// Get three most used color hex code
-		return $image->extract( 4 );
+		return $image->extract( 2 );
 
 	}
 
@@ -200,8 +200,18 @@ class Plugin {
 	 * @param $id
 	 * @param array $colors
 	 */
-	public function save_colors_for_attachment( $id, $colors = array() ) {
+	public function save_colors_for_attachment( $id, Array $colors = array() ) {
+
+		// Validate hex codes.
+		$colors = array_filter( $colors, function( $color ) {
+			return preg_match( '/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color );
+		} );
+
+		// Restrict to 2 items.
+		$colors = array_slice( $colors, 0, 2 );
+
 		update_post_meta( $id, 'hmgp_image_colors', $colors );
+
 	}
 
 	/**
