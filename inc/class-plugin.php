@@ -161,7 +161,7 @@ class Plugin {
 
 		$image = $client->loadJpeg( $image_path );
 
-		// Get three most used color hex code
+		// Get 2 most used color hex code
 		return $image->extract( 2 );
 
 	}
