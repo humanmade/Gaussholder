@@ -2,14 +2,14 @@
 
 namespace HM_Image_Placeholder;
 
-class HM_Image_Placeholders_Admin {
+class Admin {
 
 	private static $instance;
 
 	public static function get_instance() {
 
-		if ( ! ( self::$instance instanceof HM_Image_Placeholders_Admin ) ) {
-			self::$instance = new HM_Image_Placeholders_Admin();
+		if ( ! ( self::$instance instanceof Admin ) ) {
+			self::$instance = new Admin();
 			self::$instance->init();
 		}
 
