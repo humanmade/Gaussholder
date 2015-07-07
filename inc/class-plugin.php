@@ -162,7 +162,7 @@ class Plugin {
 		$image = $client->loadJpeg( $image_path );
 
 		// Get 2 most used color hex code
-		return $image->extract( 2 );
+		return $image->extract( 4 );
 
 	}
 
@@ -208,7 +208,7 @@ class Plugin {
 		} );
 
 		// Restrict to 2 items.
-		$colors = array_slice( $colors, 0, 2 );
+		$colors = array_slice( $colors, 0, 4 );
 
 		update_post_meta( $id, 'hmgp_image_colors', $colors );
 
