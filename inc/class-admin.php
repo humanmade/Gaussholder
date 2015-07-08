@@ -47,19 +47,19 @@ class Admin {
 
 		$placeholder_type = get_site_option( 'hmip_placeholder_type', 'gradient' );
 
-		ob_start(); ?>
+		?>
 
-				<fieldset>
+		<fieldset>
 
-					<legend class="screen-reader-text"><span><?php esc_html_e( 'Choose placeholder type', 'hmip' ); ?></span></legend>
+			<legend class="screen-reader-text"><span><?php esc_html_e( 'Choose placeholder type', 'hmip' ); ?></span></legend>
 
-					<label><input type="radio" name="hmip_placeholder_type" value="gradient" <?php checked( 'gradient' === $placeholder_type ); ?>> <?php esc_html_e( 'Gradients', 'hmip' ); ?></label><br>
+			<label><input type="radio" name="hmip_placeholder_type" value="gradient" <?php checked( 'gradient' === $placeholder_type ); ?>> <?php esc_html_e( 'Gradients', 'hmip' ); ?></label><br>
 
-					<label><input type="radio" name="hmip_placeholder_type" value="solid" <?php checked( 'solid' === $placeholder_type ); ?>> <?php esc_html_e( 'Solid colors', 'hmip' ); ?></label><br>
+			<label><input type="radio" name="hmip_placeholder_type" value="solid" <?php checked( 'solid' === $placeholder_type ); ?>> <?php esc_html_e( 'Solid colors', 'hmip' ); ?></label><br>
 
-				</fieldset>
+		</fieldset>
 
-		<?php echo ob_get_clean();
+		<?php
 
 	}
 
