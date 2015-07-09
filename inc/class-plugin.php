@@ -151,15 +151,35 @@ class Plugin {
 	/**
 	 * Get the image's dominant colors
 	 *
-	 * @param $image_path
+	 * @param string $image_path
+	 * @param string $mime_type
 	 *
 	 * @return array
 	 */
-	public function extract_colors( $image_path ) {
+	public function extract_colors( $image_path, $mime_type ) {
 
 		$client = new ColorExtractor;
 
-		$image = $client->loadJpeg( $image_path );
+		$image = '';
+
+		switch ( $mime_type ) {
+
+			case 'image/gif':
+				$image = $client->loadGif( $image_path );
+				break;
+
+			case 'image/png':
+				$image = $client->loadPng( $image_path );
+				break;
+
+			case 'image/jpg':
+			case 'image/jpeg':
+				$image = $client->loadJpeg( $image_path );
+		}
+
+		if ( empty( $image ) ) {
+			return new \WP_Error( 'hmip_wrong_mime_type', __( 'Could not extract colors from this file.', 'hmip' ) );
+		}
 
 		// Get 2 most used color hex code
 		return $image->extract( 4 );
@@ -223,11 +243,12 @@ class Plugin {
 	 */
 	public function calculate_colors_for_attachment( $id ) {
 
-		$img     = wp_get_attachment_image_src( $id, 'thumbnail' );
-		$uploads = wp_upload_dir();
-		$path    = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
+		$img       = wp_get_attachment_image_src( $id, 'thumbnail' );
+		$uploads   = wp_upload_dir();
+		$path      = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
+		$mime_type = get_post_mime_type( $id );
 
-		return $this->extract_colors( $path );
+		return $this->extract_colors( $path, $mime_type );
 
 	}
 
