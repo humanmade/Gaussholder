@@ -154,7 +154,7 @@ class Plugin {
 	 * @param string $image_path
 	 * @param string $mime_type
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function extract_colors( $image_path, $mime_type ) {
 
@@ -197,8 +197,11 @@ class Plugin {
 	public function filter_wp_generate_attachment_metadata( $metadata, $attachment_id ) {
 
 		$colors = $this->calculate_colors_for_attachment( $attachment_id );
-		$this->save_colors_for_attachment( $attachment_id, $colors );
 
+		if ( ! is_wp_error( $colors ) ) {
+			$this->save_colors_for_attachment( $attachment_id, $colors );
+		}
+		
 		return $metadata;
 	}
 
