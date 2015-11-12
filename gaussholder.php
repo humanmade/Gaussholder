@@ -23,10 +23,3 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 Plugin::get_instance();
-
-if ( is_admin() ) {
-	require_once __DIR__ . '/inc/class-admin.php';
-	Admin::get_instance();
-}
-
-Plugin::get_instance();
