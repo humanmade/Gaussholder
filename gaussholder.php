@@ -22,4 +22,4 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command( 'gaussholder', 'Gaussholder\\CLI_Command' );
 }
 
-Plugin::get_instance();
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\plugins_loaded' );
