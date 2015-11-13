@@ -15,11 +15,17 @@ namespace Gaussholder;
 
 use WP_CLI;
 
+define( __NAMESPACE__ . '\\PLUGIN_DIR', __DIR__ );
+
 require_once __DIR__ . '/inc/class-plugin.php';
+require_once __DIR__ . '/inc/frontend/namespace.php';
+require_once __DIR__ . '/inc/jpeg/namespace.php';
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once __DIR__  . '/inc/class-wp-cli-command.php';
 	WP_CLI::add_command( 'gaussholder', 'Gaussholder\\CLI_Command' );
 }
 
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\plugins_loaded' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\Frontend\\bootstrap' );
+add_filter( 'wp_generate_attachment_metadata', __NAMESPACE__ .  '\\generate_placeholders_on_save', 10, 2 );
+

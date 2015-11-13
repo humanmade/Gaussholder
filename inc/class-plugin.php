@@ -2,155 +2,80 @@
 
 namespace Gaussholder;
 
+const META_PREFIX = 'gaussholder_';
+
 /**
- * Set up hooked callbacks on plugins_loaded
+ * Get sizes to use placeholders on.
+ *
+ * @return string[] List of enabled sizes.
  */
-function plugins_loaded() {
+function get_enabled_sizes() {
+	/**
+	 * Filter the sizes Gaussholder images will be generated for.
+	 *
+	 * By default, Gaussholder won't generate any placeholders, and you need to
+	 * opt-in to using it. Simply filter here, and add the size names for what
+	 * you want generated.
+	 *
+	 * Be aware that for every size you add, a placeholder will be generated and
+	 * stored in the database. If you have a lot of sizes, this will be a _lot_
+	 * of data.
+	 *
+	 * @param string[] $enabled Enabled sizes.
+	 */
+	return apply_filters( 'gaussholder.image_sizes', array() );
+}
 
-	add_filter( 'wp_generate_attachment_metadata', __NAMESPACE__ .  '\\filter_wp_generate_attachment_metadata', 10, 2 );
-
-	add_filter( 'wp_get_attachment_image_attributes', __NAMESPACE__ .  '\\filter_wp_get_attachment_image_attributes', 10, 3 );
-
-	add_filter( 'image_send_to_editor', __NAMESPACE__ .  '\\filter_image_send_to_editor', 10, 8 );
+function get_blur_radius() {
+	/**
+	 * Filter the blur radius.
+	 *
+	 * The blur radius controls how much blur we use. The image is pre-scaled
+	 * down by this factor, and this is really the key to how the placeholders
+	 * work. Increasing radius decreases the required data quadratically: a
+	 * radius of 2 uses a quarter as much data as the full image; a radius of
+	 * 8 uses 1/64 the amount of data. (Due to compression, the final result
+	 * will _not_ follow this scaling.)
+	 *
+	 * Be careful tuning this, as decreasing the radius too much will cause a
+	 * huge amount of data in the body; increasing it will end up with not
+	 * enough data to be an effective placeholder.
+	 *
+	 * (Also note: changing this requires regenerating the placeholder data.)
+	 *
+	 * @param int $radius Blur radius in pixels.
+	 */
+	return apply_filters( 'gaussholder.blur_radius', 16 );
 }
 
 /**
- * Adds the style attribute to the image HTML.
+ * Is the size enabled for placeholders?
  *
- * @param $html
- * @param $id
- * @param $caption
- * @param $title
- * @param $align
- * @param $url
- * @param $size
- * @param $alt
- *
- * @return mixed
+ * @param string $size Image size to check.
+ * @return boolean True if enabled, false if not. Simple.
  */
-function filter_image_send_to_editor( $html, $id, $caption, $title, $align, $url, $size, $alt ) {
-
-	$colors_hex = get_colors_for_attachment( $id );
-
-	if ( ! $colors_hex ) {
-		return $html;
-	}
-
-	$display_type = get_site_option( 'hmip_placeholder_type' );
-
-	if ( 'gradient' === $display_type ) {
-		$style = get_gradient_style( $colors_hex );
-	} else {
-		$style = get_solid_style( $colors_hex );
-	}
-
-	$html = preg_replace( '/<img/', '<img style="' . $style . '" ', $html );
-
-	return $html;
+function is_enabled_size( $size ) {
+	return in_array( $size, get_enabled_sizes() );
 }
 
 /**
- * Adds a style attribute to image HTML.
+ * Get a placeholder for an image.
  *
- * @param $attr
- * @param $attachment
- * @param $size
- *
- * @return mixed
- */
-function filter_wp_get_attachment_image_attributes( $attr, $attachment, $size ) {
-
-	$colors_hex = get_colors_for_attachment( $attachment->ID );
-
-	if ( ! $colors_hex ) {
-		return $attr;
-	}
-
-	$display_type = get_site_option( 'hmip_placeholder_type' );
-
-	if ( 'gradient' === $display_type ) {
-		$attr['style'] = get_gradient_style( $colors_hex );
-	} else {
-		$attr['style'] = get_solid_style( $colors_hex );
-	}
-
-	return $attr;
-}
-
-/**
- * Style attribute for gradient background.
- *
- * @param $hex_colors
- *
+ * @param int $id Attachment ID.
+ * @param string $size Image size.
  * @return string
  */
-function get_gradient_style( $hex_colors ) {
-
-	foreach ( $hex_colors as $hex ) {
-		$colors[] = implode( ',', hex2rgb( $hex ) ) . ',0';
-		$colors[] = implode( ',', hex2rgb( $hex ) ) . ',1';
+function get_placeholder( $id, $size ) {
+	if ( ! is_enabled_size( $size ) ) {
+		return null;
 	}
 
-	$gradients = array();
-	$gradient_angles = array( '90', '0', '-90', '-180' );
-
-	foreach ( $gradient_angles as $key => $gradient_angle ) {
-		$gradients[] = sprintf( "linear-gradient(%sdeg, rgba(%s) 0%%, rgba(%s) 100%%, rgba(%s) 100%%)", $gradient_angle, $colors[ $key ], $colors[ $key + 1 ], $colors[ $key + 1 ] );
+	$meta = get_post_meta( $id, META_PREFIX . $size, true );
+	if ( empty( $meta ) ) {
+		return null;
 	}
 
-	$style = 'background:' . implode( $gradients, ', ' ) . ';';
-
-	return $style;
-}
-
-/**
- * Style attribute for solid backgrounds.
- *
- * @param $colors
- *
- * @return string
- */
-function get_solid_style( $colors ) {
-
-	return 'background:' . reset( $colors ) . ';';
-}
-
-/**
- * Get the image's dominant colors
- *
- * @param string $image_path
- * @param string $mime_type
- *
- * @return array|WP_Error
- */
-function extract_colors( $image_path, $mime_type ) {
-
-	$client = new ColorExtractor;
-
-	$image = '';
-
-	switch ( $mime_type ) {
-
-		case 'image/gif':
-			$image = $client->loadGif( $image_path );
-			break;
-
-		case 'image/png':
-			$image = $client->loadPng( $image_path );
-			break;
-
-		case 'image/jpg':
-		case 'image/jpeg':
-			$image = $client->loadJpeg( $image_path );
-	}
-
-	if ( empty( $image ) ) {
-		return new \WP_Error( 'hmip_wrong_mime_type', __( 'Could not extract colors from this file.', 'hmip' ) );
-	}
-
-	// Get 2 most used color hex code
-	return $image->extract( 4 );
-
+	return $meta;
 }
 
 /**
@@ -161,87 +86,78 @@ function extract_colors( $image_path, $mime_type ) {
  *
  * @return mixed
  */
-public function filter_wp_generate_attachment_metadata( $metadata, $attachment_id ) {
+function generate_placeholders_on_save( $metadata, $attachment_id ) {
+	// Is this a JPEG?
+	$mime_type = get_post_mime_type( $attachment_id );
+	if ( ! in_array( $mime_type, array( 'image/jpg', 'image/jpeg' ) ) ) {
+		return $metadata;
+	}
 
-	$colors = calculate_colors_for_attachment( $attachment_id );
+	$sizes = get_enabled_sizes();
 
-	if ( ! is_wp_error( $colors ) ) {
-		save_colors_for_attachment( $attachment_id, $colors );
+	foreach ( $sizes as $size ) {
+		$data = generate_placeholder( $attachment_id, $size );
+		if ( empty( $data ) ) {
+			continue;
+		}
+
+		// Comma-separated data, width, and height
+		$for_database = sprintf( '%s,%d,%d', base64_encode( $data[0] ), $data[1], $data[2] );
+		update_post_meta( $attachment_id, META_PREFIX . $size, $for_database );
 	}
 
 	return $metadata;
 }
 
 /**
- * Get the stored colors for the image
- * @param $id
+ * Get data for a given image size.
  *
- * @return mixed
+ * @param string $size Image size.
+ * @return array|null Image size data (with `width`, `height`, `crop` keys) on success, null if image size is invalid.
  */
-function get_colors_for_attachment( $id ) {
+function get_size_data( $size ) {
+	global $_wp_additional_image_sizes;
 
-	return get_post_meta( $id, 'hmgp_image_colors', true );
+	switch ( $size ) {
+		case 'thumbnail':
+		case 'medium':
+		case 'large':
+			$size_data = array(
+				'width'  => get_option( "{$size}_size_w" ),
+				'height' => get_option( "{$size}_size_h" ),
+				'crop'   => get_option( "{$size}_crop" ),
+			);
+			break;
 
+		default:
+			if ( ! isset( $_wp_additional_image_sizes[ $size ] ) ) {
+				return null;
+			}
+
+			$size_data = $_wp_additional_image_sizes[ $size ];
+			break;
+	}
+
+	return $size_data;
 }
 
 /**
- * Extract the colors from the image
+ * Generate a placeholder at a given size.
  *
- * @param $id
- * @param array $colors
+ * @param int $id Attachment ID.
+ * @param string $size Image size.
+ * @return array|null 3-tuple of binary image data (string), width (int), height (int) on success; null on error.
  */
-function save_colors_for_attachment( $id, Array $colors = array() ) {
+function generate_placeholder( $id, $size ) {
+	$size_data = get_size_data( $size );
+	if ( empty( $size_data ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'Invalid image size enabled for placeholders', 'gaussholder' ) );
+		return null;
+	}
 
-	// Validate hex codes.
-	$colors = array_filter( $colors, function( $color ) {
-		return preg_match( '/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $color );
-	} );
-
-	// Restrict to 2 items.
-	$colors = array_slice( $colors, 0, 4 );
-
-	update_post_meta( $id, 'hmgp_image_colors', $colors );
-
-}
-
-/**
- * Calculate the colors from the image
- *
- * @param $id
- *
- * @return array|void
- */
-function calculate_colors_for_attachment( $id ) {
-
-	$img       = wp_get_attachment_image_src( $id, 'thumbnail' );
+	$img       = wp_get_attachment_image_src( $id, $size );
 	$uploads   = wp_upload_dir();
 	$path      = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
-	$mime_type = get_post_mime_type( $id );
 
-	return extract_colors( $path, $mime_type );
-
-}
-
-/**
- * Converts a hex color to RGB.
- *
- * @param $hex
- *
- * @return array
- */
-function hex2rgb( $hex ) {
-	$hex = str_replace( "#", "", $hex );
-
-	if ( strlen( $hex ) == 3 ) {
-		$r = hexdec( substr( $hex, 0, 1 ) . substr( $hex, 0, 1 ) );
-		$g = hexdec( substr( $hex, 1, 1 ) . substr( $hex, 1, 1 ) );
-		$b = hexdec( substr( $hex, 2, 1 ) . substr( $hex, 2, 1 ) );
-	} else {
-		$r = hexdec( substr( $hex, 0, 2 ) );
-		$g = hexdec( substr( $hex, 2, 2 ) );
-		$b = hexdec( substr( $hex, 4, 2 ) );
-	}
-	$rgb = array( $r, $g, $b );
-
-	return $rgb; // returns an array with the rgb values
+	return JPEG\data_for_file( $path, get_blur_radius() );
 }
