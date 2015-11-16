@@ -1,15 +1,4 @@
 window.Gaussholder = (function (header, radius) {
-	String.prototype.hashCode = function(){
-		var hash = 0;
-		if (this.length == 0) return hash;
-		for (i = 0; i < this.length; i++) {
-			char = this.charCodeAt(i);
-			hash = ((hash<<5)-hash)+char;
-			hash = hash & hash; // Convert to 32bit integer
-		}
-		return hash;
-	};
-
 	var arrayBufferToBase64 = function( buffer ) {
 		var binary = '';
 		var bytes = new Uint8Array( buffer );
@@ -62,8 +51,6 @@ window.Gaussholder = (function (header, radius) {
 
 		var img = new Image();
 		img.src = 'data:image/jpg;base64,' + reconstituteImage(header, image);
-		// window.location = img.src;
-		var then = Date.now();
 		img.onload = function () {
 			canvas.width = width;
 			canvas.height = height;
@@ -83,7 +70,6 @@ window.Gaussholder = (function (header, radius) {
 		if ( ! ( 'gaussholder' in element.dataset ) ) {
 			return;
 		}
-		var then = Date.now();
 
 		var canvas = document.createElement('canvas');
 		var final = element.dataset.gaussholderSize.split(',');
@@ -112,7 +98,6 @@ window.Gaussholder = (function (header, radius) {
 			// Load in as our background image
 			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
 			element.style.backgroundRepeat = 'no-repeat';
-			// console.log(Date.now() - then);
 		});
 	};
 
