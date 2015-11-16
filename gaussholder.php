@@ -4,7 +4,7 @@
  * Plugin URI: http://hmn.md/
  * Description: Quick and beautiful image placeholders using Gaussian blur.
  * Version: 0.1
- * Author: Human Made Limited
+ * Author: Human Made
  * Author URI: http://hmn.md/
  * License: GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
