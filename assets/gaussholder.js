@@ -109,9 +109,65 @@ window.Gaussholder = (function (header, radius) {
 		// Load our image now
 		var img = new Image();
 		img.src = element.dataset.original;
-		// img.onload = function () {
+		img.onload = function () {
+			// We start out at less than the original radius to avoid excessive
+			// bleeding outside the element boundaries.
+			var factor = 0.4;
+
+			element.style.filter = 'blur(' + radius * factor + 'px)';
 			element.src = img.src;
-		// };
+			var start = 0;
+			var duration = 500;
+			var anim = function (ts) {
+				if ( ! start ) start = ts;
+				var diff = ts - start;
+				if ( diff > duration ) {
+					element.style.filter = '';
+					delete element.style.filter;
+					return;
+				}
+
+				var effectiveRadius = radius * ( 1 - ( diff / duration ) ) * factor;
+
+				element.style.filter = 'blur(' + effectiveRadius + 'px)';
+				window.requestAnimationFrame(anim);
+			};
+			window.requestAnimationFrame(anim);
+		};
+	};
+
+	var loadLazily = [];
+	var threshold = 1200;
+	var lastRun = 0,
+		loopTimeout = null;
+
+	var scrollHandler = function () {
+		var now = Date.now();
+		if ( ( lastRun + 40 ) > now ) {
+			if ( loopTimeout ) {
+				return;
+			}
+			loopTimeout = window.setTimeout(scrollHandler, 40);
+			return;
+		}
+		lastRun = now;
+		loopTimeout && (loopTimeout = null);
+
+		var next = [];
+		for (var i = loadLazily.length - 1; i >= 0; i--) {
+			var img = loadLazily[i];
+			var shouldShow = img.getBoundingClientRect().top <= ( window.innerHeight + threshold );
+			if ( ! shouldShow ) {
+				next.push(img);
+				continue;
+			}
+
+			loadOriginal(img);
+		}
+		loadLazily = next;
+		if (loadLazily.length < 1) {
+			window.removeEventListener('scroll', scrollHandler);
+		}
 	};
 
 	/**
@@ -119,11 +175,25 @@ window.Gaussholder = (function (header, radius) {
 	 */
 	var handleAll = function () {
 		var images = document.getElementsByTagName('img');
+
 		for (var i = images.length - 1; i >= 0; i--) {
-			handleElement(images[i]);
+			var img = images[i];
+
+			// Ensure the blank GIF has loaded first
+			if ( img.complete ) {
+				handleElement(img);
+			} else {
+				img.onload = function () {
+					handleElement(this);
+				}
+			}
 		}
-		for (var i = images.length - 1; i >= 0; i--) {
-			loadOriginal(images[i]);
+
+		loadLazily = images;
+		scrollHandler();
+
+		if (loadLazily.length > 0) {
+			window.addEventListener('scroll', scrollHandler);
 		}
 	};
 
