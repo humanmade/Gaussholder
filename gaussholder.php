@@ -29,3 +29,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\Frontend\\bootstrap' );
 add_filter( 'wp_generate_attachment_metadata', __NAMESPACE__ .  '\\generate_placeholders_on_save', 10, 2 );
 
+// We <3 you!
+if ( WP_DEBUG && ! defined( 'WP_I_AM_A_GRUMPY_PANTS' ) ) {
+	add_action( 'admin_head-plugins.php', function () {
+		echo '<style>#gaussholder .plugin-version-author-uri:after { content: "Made with \002764\00FE0F, just for you."; font-size: 0.8em; opacity: 0; float: right; transition: 300ms opacity; } #gaussholder:hover .plugin-version-author-uri:after { opacity: 0.3; }</style>';
+	});
+}
