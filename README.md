@@ -29,6 +29,8 @@ Gaussholder is an image placeholder utility, generating accurate preview images 
 
 <img src="http://zippy.gfycat.com/MarriedWearyCoelacanth.gif" />
 
+**Please note:** This is still in development, and we're working on getting this production-ready, so things might not be settled yet. In particular, we're still working on tweaking the placeholder size and improving the lazyloading code. Avoid using this in production.
+
 ## How does it work?
 
 Gaussholder is inspired by [Facebook Engineering's fantastic post][fbeng] on generating tiny preview images. Gaussholder takes the concepts from this post and applies them to the wild world of WordPress.
