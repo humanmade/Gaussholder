@@ -20,7 +20,7 @@ function bootstrap() {
  */
 function output_script() {
 	// Inline for performance
-	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		$files = array(
 			Gaussholder\PLUGIN_DIR . '/assets/stackblur.js',
 			Gaussholder\PLUGIN_DIR . '/assets/gaussholder.js',
