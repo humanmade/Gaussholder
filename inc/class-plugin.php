@@ -150,7 +150,7 @@ function get_size_data( $size ) {
  */
 function generate_placeholder( $id, $size ) {
 	$size_data = get_size_data( $size );
-	if ( empty( $size_data ) ) {
+	if ( $size !== 'full' && empty( $size_data ) ) {
 		_doing_it_wrong( __FUNCTION__, __( 'Invalid image size enabled for placeholders', 'gaussholder' ) );
 		return null;
 	}
