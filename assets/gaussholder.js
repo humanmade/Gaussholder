@@ -1,4 +1,4 @@
-window.Gaussholder = (function (header, radius) {
+window.Gaussholder = (function (header) {
 	var arrayBufferToBase64 = function( buffer ) {
 		var binary = '';
 		var bytes = new Uint8Array( buffer );
@@ -35,13 +35,13 @@ window.Gaussholder = (function (header, radius) {
 	 *
 	 * @param {HTMLCanvasElement} canvas Canvas element to render into
 	 * @param {list} image 3-tuple of base64-encoded image data, width, height
-	 * @param {int} radius Gaussian blur radius
 	 * @param {list} final Final width and height
 	 */
-	var render = function (canvas, image, radius, final, cb) {
+	var render = function (canvas, image, final, cb) {
 		var ctx = canvas.getContext('2d'),
 			width = parseInt( final[0] ),
-			height = parseInt( final[1] );
+			height = parseInt( final[1] ),
+			radius = parseInt( final[2] );
 
 		// Ensure smoothing is off
 		ctx.mozImageSmoothingEnabled = false;
@@ -94,7 +94,7 @@ window.Gaussholder = (function (header, radius) {
 		element.style.width = final[0] + 'px';
 		element.style.height = final[1] + 'px';
 
-		render(canvas, element.dataset.gaussholder.split(','), radius, final, function () {
+		render(canvas, element.dataset.gaussholder.split(','), final, function () {
 			// Load in as our background image
 			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
 			element.style.backgroundRepeat = 'no-repeat';
@@ -105,6 +105,9 @@ window.Gaussholder = (function (header, radius) {
 		if ( ! ( 'original' in element.dataset ) ) {
 			return;
 		}
+
+		var data = element.dataset.gaussholder.split(','),
+			radius = data[3];
 
 		// Load our image now
 		var img = new Image();
@@ -198,4 +201,4 @@ window.Gaussholder = (function (header, radius) {
 	};
 
 	return handleAll;
-})(window.GaussholderHeader, window.GaussholderRadius);
+})(window.GaussholderHeader);

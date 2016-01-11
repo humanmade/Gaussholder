@@ -13,6 +13,8 @@ function get_enabled_sizes() {
 	/**
 	 * Filter the sizes Gaussholder images will be generated for.
 	 *
+	 * This is a map of size name => blur radius.
+	 *
 	 * By default, Gaussholder won't generate any placeholders, and you need to
 	 * opt-in to using it. Simply filter here, and add the size names for what
 	 * you want generated.
@@ -20,6 +22,23 @@ function get_enabled_sizes() {
 	 * Be aware that for every size you add, a placeholder will be generated and
 	 * stored in the database. If you have a lot of sizes, this will be a _lot_
 	 * of data.
+	 *
+	 * The blur radius controls how much blur we use. The image is pre-scaled
+	 * down by this factor, and this is really the key to how the placeholders
+	 * work. Increasing radius decreases the required data quadratically: a
+	 * radius of 2 uses a quarter as much data as the full image; a radius of
+	 * 8 uses 1/64 the amount of data. (Due to compression, the final result
+	 * will _not_ follow this scaling.)
+	 *
+	 * Be careful tuning this, as decreasing the radius too much will cause a
+	 * huge amount of data in the body; increasing it will end up with not
+	 * enough data to be an effective placeholder.
+	 *
+	 * The radius needs to be tuned to each size individually. Ideally, you want
+	 * to keep it to about 200 bytes of data for the placeholder.
+	 *
+	 * (Also note: changing the radius requires regenerating the
+	 * placeholder data.)
 	 *
 	 * @param string[] $enabled Enabled sizes.
 	 */
@@ -49,13 +68,28 @@ function get_blur_radius() {
 }
 
 /**
+ * Get the blur radius for a given size.
+ *
+ * @param string $size Image size to get radius for.
+ * @return int|null Radius in pixels if enabled, null if size isn't enabled.
+ */
+function get_blur_radius_for_size( $size ) {
+	$sizes = get_enabled_sizes();
+	if ( ! isset( $sizes[ $size ] ) ) {
+		return null;
+	}
+
+	return absint( $sizes[ $size ] );
+}
+
+/**
  * Is the size enabled for placeholders?
  *
  * @param string $size Image size to check.
  * @return boolean True if enabled, false if not. Simple.
  */
 function is_enabled_size( $size ) {
-	return in_array( $size, get_enabled_sizes() );
+	return in_array( $size, array_keys( get_enabled_sizes() ) );
 }
 
 /**
@@ -95,8 +129,8 @@ function generate_placeholders_on_save( $metadata, $attachment_id ) {
 
 	$sizes = get_enabled_sizes();
 
-	foreach ( $sizes as $size ) {
-		$data = generate_placeholder( $attachment_id, $size );
+	foreach ( $sizes as $size => $radius ) {
+		$data = generate_placeholder( $attachment_id, $size, $radius );
 		if ( empty( $data ) ) {
 			continue;
 		}
@@ -146,9 +180,10 @@ function get_size_data( $size ) {
  *
  * @param int $id Attachment ID.
  * @param string $size Image size.
+ * @param int $radius Blur radius.
  * @return array|null 3-tuple of binary image data (string), width (int), height (int) on success; null on error.
  */
-function generate_placeholder( $id, $size ) {
+function generate_placeholder( $id, $size, $radius ) {
 	$size_data = get_size_data( $size );
 	if ( $size !== 'full' && empty( $size_data ) ) {
 		_doing_it_wrong( __FUNCTION__, __( 'Invalid image size enabled for placeholders', 'gaussholder' ) );
@@ -159,5 +194,5 @@ function generate_placeholder( $id, $size ) {
 	$uploads   = wp_upload_dir();
 	$path      = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
 
-	return JPEG\data_for_file( $path, get_blur_radius() );
+	return JPEG\data_for_file( $path, $radius );
 }

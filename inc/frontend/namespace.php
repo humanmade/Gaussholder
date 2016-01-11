@@ -34,7 +34,6 @@ function output_script() {
 	echo '<script>';
 
 	// Output header onto the page
-	echo 'var GaussholderRadius = ' . Gaussholder\get_blur_radius() . ";\n";
 	$header = JPEG\build_header();
 	$header['header'] = base64_encode( $header['header'] );
 	echo 'var GaussholderHeader = ' . json_encode( $header ) . ";\n";
@@ -98,6 +97,7 @@ function mangle_images( $content ) {
 
 		// Add final size
 		$size_data = Gaussholder\get_size_data( $size );
+		$radius = Gaussholder\get_blur_radius_for_size( $size );
 
 		// Has the size been overridden?
 		if ( preg_match( '#height=[\'"](\d+)[\'"]#i', $tag, $matches ) ) {
@@ -106,7 +106,12 @@ function mangle_images( $content ) {
 		if ( preg_match( '#width=[\'"](\d+)[\'"]#i', $tag, $matches ) ) {
 			$size_data['width'] = absint( $matches[1] );
 		}
-		$new_attrs[] = 'data-gaussholder-size="' . $size_data['width'] . ',' . $size_data['height'] . '"';
+		$new_attrs[] = sprintf(
+			'data-gaussholder-size="%s,%s,%s"',
+			$size_data['width'],
+			$size_data['height'],
+			$radius
+		);
 
 		$mangled_tag = str_replace( ' src="', ' ' . implode( ' ', $new_attrs ) . ' data-original="', $tag );
 		$content = str_replace( $tag, $mangled_tag, $content );
