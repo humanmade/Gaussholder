@@ -1,4 +1,7 @@
 window.Gaussholder = (function (header) {
+	// Fade duration in ms when the image loads in.
+	var fadeDuration = 800;
+
 	var arrayBufferToBase64 = function( buffer ) {
 		var binary = '';
 		var bytes = new Uint8Array( buffer );
@@ -106,33 +109,45 @@ window.Gaussholder = (function (header) {
 			return;
 		}
 
-		var data = element.dataset.gaussholder.split(','),
-			radius = data[3];
+		var data = element.dataset.gaussholderSize.split(','),
+			radius = parseInt( data[2] );
 
 		// Load our image now
 		var img = new Image();
 		img.src = element.dataset.original;
 		img.onload = function () {
-			// We start out at less than the original radius to avoid excessive
-			// bleeding outside the element boundaries.
-			var factor = 0.4;
+			// Filter property to use
+			var filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
+			element.style[ filterProp ] = 'blur(' + radius * 0.5 + 'px)';
 
-			element.style.filter = 'blur(' + radius * factor + 'px)';
+			// Ensure blur doesn't bleed past image border
+			element.style.clipPath = 'url(#gaussclip)'; // Current FF
+			element.style.clipPath = 'inset(0)'; // Standard
+			element.style.webkitClipPath = 'inset(0)'; // WebKit
+
+			// Set the actual source
 			element.src = img.src;
+
+			// Clear placeholder temporary image
+			// (We do this after setting the source, as doing it before can
+			// cause a tiny flicker)
+			element.style.backgroundImage = '';
+			element.style.backgroundRepeat = '';
+
 			var start = 0;
-			var duration = 500;
 			var anim = function (ts) {
 				if ( ! start ) start = ts;
 				var diff = ts - start;
-				if ( diff > duration ) {
-					element.style.filter = '';
-					delete element.style.filter;
+				if ( diff > fadeDuration ) {
+					element.style[ filterProp ] = '';
+					element.style.clipPath = '';
+					element.style.webkitClipPath = '';
 					return;
 				}
 
-				var effectiveRadius = radius * ( 1 - ( diff / duration ) ) * factor;
+				var effectiveRadius = radius * ( 1 - ( diff / fadeDuration ) );
 
-				element.style.filter = 'blur(' + effectiveRadius + 'px)';
+				element.style[ filterProp ] = 'blur(' + effectiveRadius * 0.5 + 'px)';
 				window.requestAnimationFrame(anim);
 			};
 			window.requestAnimationFrame(anim);
