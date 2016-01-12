@@ -1,10 +1,13 @@
 <?php
 
-namespace HM_Image_Placeholder;
+namespace Gaussholder;
 
-use WP_CLI, cli, WP_Query;
+use cli;
+use WP_CLI;
+use WP_CLI_Command;
+use WP_Query;
 
-class WP_CLI_Command extends \WP_CLI_Command {
+class CLI_Command extends WP_CLI_Command {
 
 	/**
 	 * Calculate image color data for a single attachment.
@@ -20,11 +23,16 @@ class WP_CLI_Command extends \WP_CLI_Command {
 			'regenerate' => false,
 		) );
 
-		$plugin        = Plugin::get_instance();
 		$attachment_id = absint( $args[0] );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( ! $args_assoc['regenerate'] ) {
+			return;
+		}
 
 		// Unless regenerating, skip attachments that already have data.
-		if ( ! $args_assoc['regenerate'] && $plugin->calculate_colors_for_attachment( $attachment_id ) ) {
+		$has_placeholder = false;
+		if ( ! $args_assoc['regenerate'] && $has_placeholder ) {
 
 			if ( $args_assoc['verbose'] ) {
 				WP_CLI::line( sprintf( 'Skipping attachment %d. Data already exists.', $attachment_id ) );
@@ -35,12 +43,7 @@ class WP_CLI_Command extends \WP_CLI_Command {
 		}
 
 		if ( ! $args_assoc['dry-run'] ) {
-
-			$plugin->save_colors_for_attachment(
-				$attachment_id,
-				$plugin->calculate_colors_for_attachment( $attachment_id )
-			);
-
+			generate_placeholders_on_save( $metadata, $attachment_id );
 		}
 
 		if ( $args_assoc['verbose'] ) {
@@ -116,6 +119,35 @@ class WP_CLI_Command extends \WP_CLI_Command {
 
 		$progress_bar->finish();
 
+	}
+
+	/**
+	 * Check how big the placeholder will be for an image or file with a given
+	 * radius.
+	 *
+	 * @subcommand check-size
+	 * @synopsis <id_or_file> <radius>
+	 * @param array $args
+	 */
+	public function check_size( $args ) {
+		if ( is_numeric( $args[0] ) ) {
+			$attachment_id = absint( $args[0] );
+			$file = get_attached_file( $attachment_id );
+			if ( empty( $file ) ) {
+				WP_CLI::error( __( 'Attachment does not exist', 'gaussholder' ) );
+			}
+		} else {
+			$file = $args[1];
+		}
+
+		if ( ! file_exists( $file ) ) {
+			WP_CLI::error( sprintf( __( 'File %s does not exist', 'gaussholder' ), $file ) );
+		}
+
+		// Generate a placeholder with the radius
+		$radius = absint( $args[1] );
+		$data = JPEG\data_for_file( $file, $radius );
+		WP_CLI::line( sprintf( '%s: %dB (%dpx radius)', basename( $file ), strlen( $data[0] ), $radius ) );
 	}
 
 }
