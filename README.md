@@ -27,7 +27,7 @@
 
 Gaussholder is an image placeholder utility, generating accurate preview images using an amazingly small amount of data.
 
-<img src="http://zippy.gfycat.com/MarriedWearyCoelacanth.gif" />
+<img src="https://zippy.gfycat.com/WeakWeakArawana.gif" />
 
 **Please note:** This is still in development, and we're working on getting this production-ready, so things might not be settled yet. In particular, we're still working on tweaking the placeholder size and improving the lazyloading code. Avoid using this in production.
 
@@ -53,12 +53,30 @@ Your filter should look something like this:
 
 ```php
 add_filter( 'gaussholder.image_sizes', function ( $sizes ) {
-	$sizes[] = 'medium';
-	$sizes[] = 'large';
-	$sizes[] = 'full';
+	$sizes['medium'] = 16;
+	$sizes['large'] = 32;
+	$sizes['full'] = 84;
 	return $sizes;
 } );
 ```
+
+The keys are registered image sizes (plus `full` for the original size), with the value as the desired blur radius in pixels.
+
+By default, Gaussholder won't generate any placeholders, and you need to opt-in to using it. Simply filter here, and add the size names for what you want generated.
+
+Be aware that for every size you add, a placeholder will be generated and stored in the database. If you have a lot of sizes, this will be a _lot_ of data.
+
+### Blur radius
+
+The blur radius controls how much blur we use. The image is pre-scaled down by this factor, and this is really the key to how the placeholders work. Increasing radius decreases the required data quadratically: a radius of 2 uses a quarter as much data as the full image; a radius of 8 uses 1/64 the amount of data. (Due to compression, the final result will *not* follow this scaling.)
+
+Be careful tuning this, as decreasing the radius too much will cause a huge amount of data in the body; increasing it will end up with not enough data to be an effective placeholder.
+
+The radius needs to be tuned to each size individually. Facebook uses about 200 bytes of data for their placeholders, but you may want higher quality placeholders. There's no ideal radius, as you simply want to balance having a useful placeholder with the extra time needed to process the data on the page.
+
+Gaussholder includes a CLI command to help you tune the radius: pick a representative attachment or image file and use `wp gaussholder check-size <id_or_image> <radius>`. Adjust the radius until you get to roughly 200B, then check against other attachments to ensure they're in the ballpark.
+
+Note: changing the radius requires regenerating the placeholder data. Run `wp gaussholder process-all --regenerate` after changing radii or adding new sizes.
 
 ## License
 Gaussholder is licensed under the GPLv2 or later.
