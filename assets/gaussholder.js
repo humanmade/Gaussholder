@@ -105,7 +105,7 @@ window.Gaussholder = (function (header) {
 	};
 
 	var loadOriginal = function (element) {
-		if ( ! ( 'original' in element.dataset ) ) {
+		if ( ! ( 'originalsrc' in element.dataset ) || ! ( 'originalsrcset' in element.dataset ) ) {
 			return;
 		}
 
@@ -114,7 +114,9 @@ window.Gaussholder = (function (header) {
 
 		// Load our image now
 		var img = new Image();
-		img.src = element.dataset.original;
+
+		img.src = element.dataset.originalsrc;
+		img.srcset = element.dataset.originalsrcset;
 		img.onload = function () {
 			// Filter property to use
 			var filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
@@ -127,6 +129,11 @@ window.Gaussholder = (function (header) {
 
 			// Set the actual source
 			element.src = img.src;
+			element.srcset = img.srcset;
+
+			// Cleaning source
+			element.dataset.originalsrc = '';
+			element.dataset.originalsrcset = '';
 
 			// Clear placeholder temporary image
 			// (We do this after setting the source, as doing it before can
