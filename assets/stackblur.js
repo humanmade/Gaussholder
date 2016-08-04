@@ -105,7 +105,6 @@ var StackBlur = (function () {
 	            }
 	        }*/
 	    } catch(e) {
-	        alert("Cannot access image");
 	        throw new Error("unable to access image data: " + e);
 	    }
 
