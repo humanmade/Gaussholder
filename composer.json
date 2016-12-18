@@ -1,6 +1,6 @@
 {
 	"name":              "humanmade/gaussholder",
-	"description":       "WordPress importer plugin",
+	"description":       "Fast and lightweight image previews for WordPress",
 	"license":           "GPLv2",
 	"authors":           [
 		{
