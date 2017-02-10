@@ -58,7 +58,7 @@ function output_script() {
  */
 function mangle_images( $content ) {
 	// Find images
-	$searcher = '#<img[^>]+(?:class=[\'"]([^\'"]+wp-image-(\d+)[^\'"]*)|data-gaussholder-id="(\d+)")[^>]+>#x';
+	$searcher = '#<img[^>]+(?:class=[\'"]([^\'"]*wp-image-(\d+)[^\'"]*)|data-gaussholder-id="(\d+)")[^>]+>#x';
 	if ( ! preg_match_all( $searcher, $content, $images, PREG_SET_ORDER ) ) {
 		return $content;
 	}
