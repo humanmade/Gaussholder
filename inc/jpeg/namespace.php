@@ -189,8 +189,6 @@ function build_header() {
 function data_for_file( $file, $radius ) {
 	$editor = new Imagick( $file );
 	$size = $editor->getImageGeometry();
-	// var_dump( $editor->getSamplingFactors() );
-	// var_dump( $file, $size );
 
 	// Normalise the density to 72dpi
 	$editor->setImageResolution( 72, 72 );
@@ -213,12 +211,6 @@ function data_for_file( $file, $radius ) {
 
 	// Strip the header
 	$scaled_stripped = substr( $scaled, strpos( $scaled, "\xFF\xDA" ) + 2 );
-	file_put_contents( __DIR__ . '/scaled.jpg', $scaled );
-	// file_put_contents( __DIR__ . '/scaled-stripped.jpg', $scaled_stripped );
-
-	// $header = build_header();
-	// $new = $header['header'] . $scaled_stripped;
-	// $new[ $header['height_offset'] ] = chr( $size)
 
 	return array( $scaled_stripped, $width, $height );
 }
