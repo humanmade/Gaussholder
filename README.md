@@ -27,7 +27,7 @@
 
 Gaussholder is an image placeholder utility, generating accurate preview images using an amazingly small amount of data.
 
-<img src="https://giant.gfycat.com/MemorableCoordinatedAngelfish.gif" />
+<img src="preview.gif" />
 
 That's a **800 byte** preview image, for a **109 kilobyte** image. 800 bytes still too big? Tune the size to your liking in your configuration.
 
