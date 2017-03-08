@@ -6,11 +6,11 @@
 		</td>
 		<td align="right" width="20%">
 			<!--
-			<a href="https://travis-ci.org/humanmade/Mercator">
-				<img src="https://travis-ci.org/humanmade/Mercator.svg?branch=master" alt="Build status">
+			<a href="https://travis-ci.org/humanmade/Gaussholder">
+				<img src="https://travis-ci.org/humanmade/Gaussholder.svg?branch=master" alt="Build status">
 			</a>
-			<a href="http://codecov.io/github/humanmade/Mercator?branch=master">
-				<img src="http://codecov.io/github/humanmade/Mercator/coverage.svg?branch=master" alt="Coverage via codecov.io" />
+			<a href="http://codecov.io/github/humanmade/Gaussholder?branch=master">
+				<img src="http://codecov.io/github/humanmade/Gaussholder/coverage.svg?branch=master" alt="Coverage via codecov.io" />
 			</a>
 			-->
 		</td>
