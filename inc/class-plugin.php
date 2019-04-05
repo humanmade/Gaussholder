@@ -113,6 +113,25 @@ function get_placeholder( $id, $size ) {
 }
 
 /**
+ * Schedule a background task to generate placeholders.
+ *
+ * @param array $metadata
+ * @param int $attachment_id
+ * @return array
+ */
+function queue_generate_placeholders_on_save( $metadata, $attachment_id ) {
+	// Is this a JPEG?
+	$mime_type = get_post_mime_type( $attachment_id );
+	if ( ! in_array( $mime_type, array( 'image/jpg', 'image/jpeg' ) ) ) {
+		return $metadata;
+	}
+
+	wp_schedule_single_event( time() + 5, 'gaussholder.generate_placeholders', [ $attachment_id ] );
+
+	return $metadata;
+}
+
+/**
  * Save extracted colors to image metadata
  *
  * @param $metadata
@@ -120,15 +139,14 @@ function get_placeholder( $id, $size ) {
  *
  * @return mixed
  */
-function generate_placeholders_on_save( $metadata, $attachment_id ) {
+function generate_placeholders( $attachment_id ) {
 	// Is this a JPEG?
 	$mime_type = get_post_mime_type( $attachment_id );
 	if ( ! in_array( $mime_type, array( 'image/jpg', 'image/jpeg' ) ) ) {
-		return $metadata;
+		return;
 	}
 
 	$sizes = get_enabled_sizes();
-
 	foreach ( $sizes as $size => $radius ) {
 		$data = generate_placeholder( $attachment_id, $size, $radius );
 		if ( empty( $data ) ) {
@@ -139,8 +157,6 @@ function generate_placeholders_on_save( $metadata, $attachment_id ) {
 		$for_database = sprintf( '%s,%d,%d', base64_encode( $data[0] ), $data[1], $data[2] );
 		update_post_meta( $attachment_id, META_PREFIX . $size, $for_database );
 	}
-
-	return $metadata;
 }
 
 /**

@@ -22,13 +22,13 @@ require_once __DIR__ . '/inc/frontend/namespace.php';
 require_once __DIR__ . '/inc/jpeg/namespace.php';
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	require_once __DIR__  . '/inc/class-wp-cli-command.php';
+	require_once __DIR__ . '/inc/class-wp-cli-command.php';
 	WP_CLI::add_command( 'gaussholder', 'Gaussholder\\CLI_Command' );
 }
 
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\Frontend\\bootstrap' );
-add_filter( 'wp_generate_attachment_metadata', __NAMESPACE__ .  '\\generate_placeholders_on_save', 10, 2 );
-
+add_filter( 'wp_update_attachment_metadata', __NAMESPACE__ . '\\queue_generate_placeholders_on_save', 10, 2 );
+add_action( 'gaussholder.generate_placeholders', __NAMESPACE__ . '\\generate_placeholders' );
 // We <3 you!
 if ( WP_DEBUG && ! defined( 'WP_I_AM_A_GRUMPY_PANTS' ) ) {
 	add_action( 'admin_head-plugins.php', function () {
