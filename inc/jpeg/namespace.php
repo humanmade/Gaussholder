@@ -187,7 +187,13 @@ function build_header() {
  * @return array 3-tuple of binary image data (string), width (int), and height (int).
  */
 function data_for_file( $file, $radius ) {
-	$editor = new Imagick( $file );
+	if ( parse_url( $file, PHP_URL_SCHEME ) ) {
+		$editor = new Imagick();
+		$editor->readImageBlob( file_get_contents( $file ) );
+	} else {
+		$editor = new Imagick( $file );
+	}
+
 	$size = $editor->getImageGeometry();
 
 	// Normalise the density to 72dpi
