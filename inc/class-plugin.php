@@ -186,13 +186,29 @@ function get_size_data( $size ) {
 function generate_placeholder( $id, $size, $radius ) {
 	$size_data = get_size_data( $size );
 	if ( $size !== 'full' && empty( $size_data ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'Invalid image size enabled for placeholders', 'gaussholder' ) );
+		_doing_it_wrong( __FUNCTION__, __( 'Invalid image size enabled for placeholders', 'gaussholder' ), '1.0.0' );
 		return null;
 	}
 
-	$img       = wp_get_attachment_image_src( $id, $size );
 	$uploads   = wp_upload_dir();
-	$path      = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
+	$img       = wp_get_attachment_image_src( $id, $size );
 
-	return JPEG\data_for_file( $path, $radius );
+	// Pass image paths directly to data_for_file.
+	if ( strpos( $img[0], $uploads['baseurl'] ) === 0 ) {
+		$path = str_replace( $uploads['baseurl'], $uploads['basedir'], $img[0] );
+		return JPEG\data_for_file( $path, $radius );
+	}
+
+	// If the image url wp_get_attachment_image_src is not a local url (for example),
+	// using Tachyon or Photon, download the file to temp before passing it to data_for_file.
+	// This is needed because IMagick can not handle remote files, and we specifically want
+	// to use the remote file rather than mapping it to an image on disk, as the remote
+	// service such as Tachyon may look different (smart dropping, image filters) etc.
+	$path = download_url( $img[0] );
+	if ( is_wp_error( $path ) ) {
+		return;
+	}
+	$data = JPEG\data_for_file( $path, $radius );
+	unlink( $path );
+	return $data;
 }
