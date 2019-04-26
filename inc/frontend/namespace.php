@@ -72,10 +72,31 @@ function mangle_images( $content ) {
 			// Singular image, using `class="wp-image-<id>"`
 			$id = $image[2];
 			$class = $image[1];
+
+			// Attempt to get the image size from a size class.
 			if ( ! preg_match( '#\bsize-([\w-]+)\b#', $class, $size_match ) ) {
-				continue;
+				// If we don't have a size class, the only other option is to search
+				// all the URLs for image sizes that we support, and see if the src
+				// attribute matches.
+				preg_match( '#\bsrc=[\'|"]([^\'"]*)#', $tag, $src_match );
+				$all_sizes = array_keys( Gaussholder\get_enabled_sizes() );
+				foreach ( $all_sizes as $single_size ) {
+					$url = wp_get_attachment_image_src( $id, $single_size );
+					// WordPress applies esc_attr (and sometimes esc_url) to all image attributes,
+					// so we have decode entities when making a comparison.
+					if ( $url[0] === html_entity_decode( $src_match[1] ) ) {
+						$size = $single_size;
+						break;
+					}
+				}
+				// If we still were not able to find the image size from the src
+				// attribute, then skit this image.
+				if ( ! isset( $size ) ) {
+					continue;
+				}
+			} else {
+				$size = $size_match[1];
 			}
-			$size = $size_match[1];
 		} else {
 			// Gallery, using `data-gaussholder-id="<id>"`
 			$id = $image[3];
