@@ -105,7 +105,7 @@ window.Gaussholder = (function (header) {
 	};
 
 	var loadOriginal = function (element) {
-		if ( ! ( 'originalsrc' in element.dataset ) || ! ( 'originalsrcset' in element.dataset ) ) {
+		if ( ! ( 'originalsrc' in element.dataset ) && ! ( 'originalsrcset' in element.dataset ) ) {
 			return;
 		}
 
@@ -115,8 +115,13 @@ window.Gaussholder = (function (header) {
 		// Load our image now
 		var img = new Image();
 
-		img.src = element.dataset.originalsrc;
-		img.srcset = element.dataset.originalsrcset;
+		if ( element.dataset.originalsrc ) {
+			img.src = element.dataset.originalsrc;
+		}
+		if ( element.dataset.originalsrcset ) {
+			img.srcset = element.dataset.originalsrcset;
+		}
+
 		img.onload = function () {
 			// Filter property to use
 			var filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
