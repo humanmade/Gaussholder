@@ -90,7 +90,7 @@ function mangle_images( $content ) {
 					}
 				}
 				// If we still were not able to find the image size from the src
-				// attribute, then skit this image.
+				// attribute, then skip this image.
 				if ( ! isset( $size ) ) {
 					continue;
 				}
