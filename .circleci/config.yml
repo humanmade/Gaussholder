@@ -17,7 +17,7 @@ jobs:
           key: npm
 
       # Build steps:
-      - run: npm install grunt-cli
+      - run: npm install grunt
       - run: node_modules/.bin/grunt
 
       # Make fast:
