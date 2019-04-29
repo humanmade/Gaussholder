@@ -7,7 +7,6 @@
 
 .git
 .gitignore
-.circleci
 Gruntfile.js
 node_modules
 package.json
