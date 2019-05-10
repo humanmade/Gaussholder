@@ -102,7 +102,11 @@ function mangle_images( $content ) {
 		$new_attrs[] = 'data-gaussholder="' . esc_attr( $placeholder ) . '"';
 
 		// Add final size
-		$size_data = Gaussholder\get_size_data( $size );
+		$image_data = wp_get_attachment_image_src( $id, $size );
+		$size_data = [
+			'width'  => $image_data[1],
+			'height' => $image_data[2],
+		];
 		$radius = Gaussholder\get_blur_radius_for_size( $size );
 
 		// Has the size been overridden?
