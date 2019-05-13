@@ -45,7 +45,7 @@ function output_script() {
 	echo 'Gaussholder();</script>';
 
 	// Clipping path for Firefox compatibility on fade in
-	echo '<svg width="0" height="0"><clipPath id="gaussclip" clipPathUnits="objectBoundingBox"><rect width="1" height="1"></rect></clipPath></svg>';
+	echo '<svg width="0" height="0" style="position: absolute"><clipPath id="gaussclip" clipPathUnits="objectBoundingBox"><rect width="1" height="1"></rect></clipPath></svg>';
 }
 
 /**
