@@ -3,7 +3,7 @@
  * Plugin Name: Gaussholder
  * Plugin URI: http://hmn.md/
  * Description: Quick and beautiful image placeholders using Gaussian blur.
- * Version: 1.1.1
+ * Version: 1.1.3
  * Author: Human Made
  * Author URI: http://hmn.md/
  * License: GPL-2.0+
