@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.3-node
+
+    branches:
+      only:
+        # Whitelist branches to build for.
+        - master
+    steps:
+      # Checkout repo & subs:
+      - checkout
+
+      # Get npm cache:
+      - restore_cache:
+          key: npm
+
+      # Build steps:
+      - run: npm install grunt grunt-contrib-uglify
+      - run: node_modules/.bin/grunt
+
+      # Make fast:
+      - save_cache:
+          key: npm
+          paths:
+            - ~/.npm
+
+      # Run the deploy:
+      - deploy:
+          command: .circleci/deploy.sh
