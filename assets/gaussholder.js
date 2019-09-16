@@ -65,6 +65,36 @@ window.Gaussholder = (function (header) {
 	};
 
 	/**
+	 * Recalculate image ratio when an image renders on the page.
+	 *
+	 * @param {MutationRecord[]} Updates to an element's attributes.
+	 */
+	var recalculateDimensions = function (mutation) {
+		// Ignore changes to the "style" attribute, to prevent recursion.
+		if ( mutation.attributeName === 'style' ) {
+			return;
+		}
+
+		var element = mutation.target;
+		var actual = element.getBoundingClientRect();
+		var size = element.dataset.gaussholderSize.split(',');
+		var width = parseInt( size[0], 10 ), height = parseInt( size[1], 10 );
+
+		if ( actual.width < width ) {
+			// Rescale, keeping the aspect ratio
+			height = height * ( actual.width / width );
+			width = actual.width;
+		} else if ( actual.height < height ) {
+			// Rescale, keeping the aspect ratio
+			width = width * ( actual.height / height );
+			height = actual.height;
+		}
+
+		element.style.width = width + 'px';
+		element.style.height = height + 'px';
+	};
+
+	/**
 	 * Render placeholder for an image
 	 *
 	 * @param {HTMLImageElement} element Element to render placeholder for
@@ -82,20 +112,8 @@ window.Gaussholder = (function (header) {
 		element.style.height = final[1] + 'px';
 
 		// ...then recalculate based on what it actually renders as
-		var original = [ final[0], final[1] ];
-		if ( element.width < final[0] ) {
-			// Rescale, keeping the aspect ratio
-			final[0] = element.width;
-			final[1] = final[1] * ( final[0] / original[0] );
-		} else if ( element.height < final[1] ) {
-			// Rescale, keeping the aspect ratio
-			final[1] = element.height;
-			final[0] = final[0] * ( final[1] / original[1] );
-		}
-
-		// Set dimensions, _again_
-		element.style.width = final[0] + 'px';
-		element.style.height = final[1] + 'px';
+		var resizeObserver = new MutationObserver( function( mutations ) { mutations.forEach( recalculateDimensions ) } );
+		resizeObserver.observe( element, { attributes: true, subtree: true } );
 
 		render(canvas, element.dataset.gaussholder.split(','), final, function () {
 			// Load in as our background image
