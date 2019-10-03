@@ -108,17 +108,6 @@ window.Gaussholder = (function (header) {
 		calculateDimensionStyle( element );
 
 		// Schedule an observer to update on any rendering changes.
-		//var resizeObserver = new MutationObserver(
-			//function( mutations ) {
-				//var element = mutations[0].target;
-				//if ( element.clientWidth === parseInt( element.style.width, 10 ) ) {
-					//return;
-				//}
-				//calculateDimensionStyle( element );
-			//}
-		//);
-		//resizeObserver.observe( element, { childList: true, attributes: true, subtree: true, [> attributeFilter: [ 'src' ] <] } );
-
 		render(canvas, element.dataset.gaussholder.split(','), final, function () {
 			// Load in as our background image
 			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
