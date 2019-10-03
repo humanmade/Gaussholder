@@ -67,15 +67,9 @@ window.Gaussholder = (function (header) {
 	/**
 	 * Recalculate image ratio when an image renders on the page.
 	 *
-	 * @param {MutationRecord[]} Updates to an element's attributes.
+	 * @param {HTMLImageElement} Image element to recalculate dimensions for.
 	 */
-	var recalculateDimensions = function (mutation) {
-		// Ignore changes to the "style" attribute, to prevent recursion.
-		if ( mutation.attributeName === 'style' ) {
-			return;
-		}
-
-		var element = mutation.target;
+	var calculateDimensionStyle = function (element) {
 		var actual = element.getBoundingClientRect();
 		var size = element.dataset.gaussholderSize.split(',');
 		var width = parseInt( size[0], 10 ), height = parseInt( size[1], 10 );
@@ -90,8 +84,7 @@ window.Gaussholder = (function (header) {
 			height = actual.height;
 		}
 
-		element.style.width = width + 'px';
-		element.style.height = height + 'px';
+		element.style.cssText += 'width: ' + width + 'px; height: ' + height + 'px;';
 	};
 
 	/**
@@ -112,13 +105,25 @@ window.Gaussholder = (function (header) {
 		element.style.height = final[1] + 'px';
 
 		// ...then recalculate based on what it actually renders as
-		var resizeObserver = new MutationObserver( function( mutations ) { mutations.forEach( recalculateDimensions ) } );
-		resizeObserver.observe( element, { attributes: true, subtree: true } );
+		calculateDimensionStyle( element );
+
+		// Schedule an observer to update on any rendering changes.
+		//var resizeObserver = new MutationObserver(
+			//function( mutations ) {
+				//var element = mutations[0].target;
+				//if ( element.clientWidth === parseInt( element.style.width, 10 ) ) {
+					//return;
+				//}
+				//calculateDimensionStyle( element );
+			//}
+		//);
+		//resizeObserver.observe( element, { childList: true, attributes: true, subtree: true, [> attributeFilter: [ 'src' ] <] } );
 
 		render(canvas, element.dataset.gaussholder.split(','), final, function () {
 			// Load in as our background image
 			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
 			element.style.backgroundRepeat = 'no-repeat';
+			setTimeout( function() { calculateDimensionStyle( element ); }, 200 );
 		});
 	};
 
