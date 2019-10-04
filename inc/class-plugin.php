@@ -2,6 +2,8 @@
 
 namespace Gaussholder;
 
+use WP_Error;
+
 const META_PREFIX = 'gaussholder_';
 
 /**
@@ -137,19 +139,22 @@ function queue_generate_placeholders_on_save( $metadata, $attachment_id ) {
  * @param $metadata
  * @param $attachment_id
  *
- * @return mixed
+ * @return WP_Error|bool
  */
 function generate_placeholders( $attachment_id ) {
 	// Is this a JPEG?
 	$mime_type = get_post_mime_type( $attachment_id );
 	if ( ! in_array( $mime_type, array( 'image/jpg', 'image/jpeg' ) ) ) {
-		return;
+		return new WP_Error( 'image-not-jpg', 'Image is not a JPEG.' );
 	}
+
+	$errors = new WP_Error;
 
 	$sizes = get_enabled_sizes();
 	foreach ( $sizes as $size => $radius ) {
 		$data = generate_placeholder( $attachment_id, $size, $radius );
 		if ( empty( $data ) ) {
+			$errors->add( $size, sprintf( 'Unable to generate placeholder for %s', $size ) );
 			continue;
 		}
 
@@ -157,6 +162,12 @@ function generate_placeholders( $attachment_id ) {
 		$for_database = sprintf( '%s,%d,%d', base64_encode( $data[0] ), $data[1], $data[2] );
 		update_post_meta( $attachment_id, META_PREFIX . $size, $for_database );
 	}
+
+	if ( $errors->has_errors() ) {
+		return $errors;
+	}
+
+	return true;
 }
 
 /**
@@ -222,6 +233,7 @@ function generate_placeholder( $id, $size, $radius ) {
 	// service such as Tachyon may look different (smart dropping, image filters) etc.
 	$path = download_url( $img[0] );
 	if ( is_wp_error( $path ) ) {
+		trigger_error( sprintf( 'Error downloading image from %s: ', $img[0], $path->get_error_message() ), E_USER_WARNING );
 		return;
 	}
 	$data = JPEG\data_for_file( $path, $radius );
