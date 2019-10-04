@@ -1,33 +1,34 @@
-window.Gaussholder = (function (header) {
+/* global StackBlur */
+window.Gaussholder = ( function ( header ) {
 	// Fade duration in ms when the image loads in.
 	var fadeDuration = 800;
 
-	var arrayBufferToBase64 = function( buffer ) {
+	var arrayBufferToBase64 = function ( buffer ) {
 		var binary = '';
 		var bytes = new Uint8Array( buffer );
 		var len = bytes.byteLength;
-		for (var i = 0; i < len; i++) {
+		for ( var i = 0; i < len; i++ ) {
 		    binary += String.fromCharCode( bytes[ i ] );
 		}
 		return window.btoa( binary );
 	};
 
-	var reconstituteImage = function (header, image) {
+	var reconstituteImage = function ( header, image ) {
 		var image_data = image[0],
 			width = parseInt( image[1] ),
 			height = parseInt( image[2] );
 
 		var full = atob( header.header ) + atob( image_data );
 		var bytes = new Uint8Array( full.length );
-		for (var i = 0; i < full.length; i++) {
-			bytes[i] = full.charCodeAt(i);
+		for ( var i = 0; i < full.length; i++ ) {
+			bytes[i] = full.charCodeAt( i );
 		}
 
 		// Poke the bits.
-		bytes[ header.height_offset ] = ( (height >> 8) & 0xFF);
-		bytes[ header.height_offset + 1 ] = (height & 0xFF);
-		bytes[ header.length_offset ] = ( (width >> 8) & 0xFF);
-		bytes[ header.length_offset + 1] = (width & 0xFF);
+		bytes[ header.height_offset ] = ( ( height >> 8 ) & 0xFF );
+		bytes[ header.height_offset + 1 ] = ( height & 0xFF );
+		bytes[ header.length_offset ] = ( ( width >> 8 ) & 0xFF );
+		bytes[ header.length_offset + 1] = ( width & 0xFF );
 
 		// Back to a full JPEG now.
 		return arrayBufferToBase64( bytes );
@@ -40,8 +41,8 @@ window.Gaussholder = (function (header) {
 	 * @param {list} image 3-tuple of base64-encoded image data, width, height
 	 * @param {list} final Final width and height
 	 */
-	var render = function (canvas, image, final, cb) {
-		var ctx = canvas.getContext('2d'),
+	var render = function ( canvas, image, final, cb ) {
+		var ctx = canvas.getContext( '2d' ),
 			width = parseInt( final[0] ),
 			height = parseInt( final[1] ),
 			radius = parseInt( final[2] );
@@ -53,12 +54,12 @@ window.Gaussholder = (function (header) {
 		ctx.imageSmoothingEnabled = false;
 
 		var img = new Image();
-		img.src = 'data:image/jpg;base64,' + reconstituteImage(header, image);
+		img.src = 'data:image/jpg;base64,' + reconstituteImage( header, image );
 		img.onload = function () {
 			canvas.width = width;
 			canvas.height = height;
 
-			ctx.drawImage(img, 0, 0, width, height);
+			ctx.drawImage( img, 0, 0, width, height );
 			StackBlur.canvasRGB( canvas, 0, 0, width, height, radius );
 			cb();
 		};
@@ -69,9 +70,9 @@ window.Gaussholder = (function (header) {
 	 *
 	 * @param {HTMLImageElement} Image element to recalculate dimensions for.
 	 */
-	var calculateDimensionStyle = function (element) {
+	var calculateDimensionStyle = function ( element ) {
 		var actual = element.getBoundingClientRect();
-		var size = element.dataset.gaussholderSize.split(',');
+		var size = element.dataset.gaussholderSize.split( ',' );
 		var width = parseInt( size[0], 10 ), height = parseInt( size[1], 10 );
 
 		if ( actual.width < width ) {
@@ -92,13 +93,13 @@ window.Gaussholder = (function (header) {
 	 *
 	 * @param {HTMLImageElement} element Element to render placeholder for
 	 */
-	var handleElement = function (element) {
+	var handleElement = function ( element ) {
 		if ( ! ( 'gaussholder' in element.dataset ) ) {
 			return;
 		}
 
-		var canvas = document.createElement('canvas');
-		var final = element.dataset.gaussholderSize.split(',');
+		var canvas = document.createElement( 'canvas' );
+		var final = element.dataset.gaussholderSize.split( ',' );
 
 		// Set the dimensions...
 		element.style.width = final[0] + 'px';
@@ -108,20 +109,22 @@ window.Gaussholder = (function (header) {
 		calculateDimensionStyle( element );
 
 		// Schedule an observer to update on any rendering changes.
-		render(canvas, element.dataset.gaussholder.split(','), final, function () {
+		render( canvas, element.dataset.gaussholder.split( ',' ), final, function () {
 			// Load in as our background image
 			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
 			element.style.backgroundRepeat = 'no-repeat';
-			setTimeout( function() { calculateDimensionStyle( element ); }, 200 );
-		});
+			setTimeout( function () {
+				calculateDimensionStyle( element );
+			}, 200 );
+		} );
 	};
 
-	var loadOriginal = function (element) {
+	var loadOriginal = function ( element ) {
 		if ( ! ( 'originalsrc' in element.dataset ) && ! ( 'originalsrcset' in element.dataset ) ) {
 			return;
 		}
 
-		var data = element.dataset.gaussholderSize.split(','),
+		var data = element.dataset.gaussholderSize.split( ',' ),
 			radius = parseInt( data[2] );
 
 		// Load our image now
@@ -159,7 +162,7 @@ window.Gaussholder = (function (header) {
 			element.style.backgroundRepeat = '';
 
 			var start = 0;
-			var anim = function (ts) {
+			var anim = function ( ts ) {
 				if ( ! start ) start = ts;
 				var diff = ts - start;
 				if ( diff > fadeDuration ) {
@@ -172,9 +175,9 @@ window.Gaussholder = (function (header) {
 				var effectiveRadius = radius * ( 1 - ( diff / fadeDuration ) );
 
 				element.style[ filterProp ] = 'blur(' + effectiveRadius * 0.5 + 'px)';
-				window.requestAnimationFrame(anim);
+				window.requestAnimationFrame( anim );
 			};
-			window.requestAnimationFrame(anim);
+			window.requestAnimationFrame( anim );
 		};
 	};
 
@@ -189,26 +192,26 @@ window.Gaussholder = (function (header) {
 			if ( loopTimeout ) {
 				return;
 			}
-			loopTimeout = window.setTimeout(scrollHandler, 40);
+			loopTimeout = window.setTimeout( scrollHandler, 40 );
 			return;
 		}
 		lastRun = now;
-		loopTimeout && (loopTimeout = null);
+		loopTimeout && ( loopTimeout = null );
 
 		var next = [];
-		for (var i = loadLazily.length - 1; i >= 0; i--) {
+		for ( var i = loadLazily.length - 1; i >= 0; i-- ) {
 			var img = loadLazily[i];
 			var shouldShow = img.getBoundingClientRect().top <= ( window.innerHeight + threshold );
 			if ( ! shouldShow ) {
-				next.push(img);
+				next.push( img );
 				continue;
 			}
 
-			loadOriginal(img);
+			loadOriginal( img );
 		}
 		loadLazily = next;
-		if (loadLazily.length < 1) {
-			window.removeEventListener('scroll', scrollHandler);
+		if ( loadLazily.length < 1 ) {
+			window.removeEventListener( 'scroll', scrollHandler );
 		}
 	};
 
@@ -216,17 +219,17 @@ window.Gaussholder = (function (header) {
 	 * Render all placeholders on the page
 	 */
 	var handleAll = function () {
-		var images = document.getElementsByTagName('img');
+		var images = document.getElementsByTagName( 'img' );
 
-		for (var i = images.length - 1; i >= 0; i--) {
+		for ( var i = images.length - 1; i >= 0; i-- ) {
 			var img = images[i];
 
 			// Ensure the blank GIF has loaded first
 			if ( img.complete ) {
-				handleElement(img);
+				handleElement( img );
 			} else {
 				img.onload = function () {
-					handleElement(this);
+					handleElement( this );
 				}
 			}
 		}
@@ -234,10 +237,10 @@ window.Gaussholder = (function (header) {
 		loadLazily = images;
 		scrollHandler();
 
-		if (loadLazily.length > 0) {
-			window.addEventListener('scroll', scrollHandler);
+		if ( loadLazily.length > 0 ) {
+			window.addEventListener( 'scroll', scrollHandler );
 		}
 	};
 
 	return handleAll;
-})(window.GaussholderHeader);
+} )( window.GaussholderHeader );
