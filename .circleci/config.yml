@@ -17,8 +17,8 @@ jobs:
           key: npm
 
       # Build steps:
-      - run: npm install grunt grunt-contrib-uglify
-      - run: node_modules/.bin/grunt
+      - run: npm install
+      - run: npm run build
 
       # Make fast:
       - save_cache:

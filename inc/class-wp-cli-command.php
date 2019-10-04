@@ -43,7 +43,11 @@ class CLI_Command extends WP_CLI_Command {
 		}
 
 		if ( ! $args_assoc['dry-run'] ) {
-			generate_placeholders( $attachment_id );
+			$result = generate_placeholders( $attachment_id );
+		}
+
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::error( implode( "\n", $result->get_error_messages() ) );
 		}
 
 		if ( $args_assoc['verbose'] ) {
