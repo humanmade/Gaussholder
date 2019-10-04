@@ -4,8 +4,8 @@ To get started follow these steps:
 
 1. `git clone git@github.com:humanmade/gaussholder.git` or fork the repository and clone your fork.
 1. `cd gaussholder`
-1. `npm install grunt grunt-contrib-uglify`
-1. `./node_modules/.bin/grunt` (to build the assets)
+1. `npm install`
+1. `npm run build` (to build the assets)
 
 You should then start working on your fork or branch.
 
@@ -16,7 +16,7 @@ When you make a pull request it will be reviewed. You should also update the `CH
 ## Making a new release
 
 1. Create a new branch
-2. Update the version number in the comment header of `plugin.php` to reflect the nature of the changes, this plugin follows semver versioning. 
+2. Update the version number in the comment header of `plugin.php` to reflect the nature of the changes, this plugin follows semver versioning.
   - For small changes like bug fixes update the patch version
   - For changes that add functionality without changing existing functionality update the minor version
   - For breaking or highly significant changes update the major version
