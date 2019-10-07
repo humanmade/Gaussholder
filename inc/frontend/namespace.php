@@ -97,6 +97,7 @@ function mangle_images( $content ) {
 			} else {
 				$size = $size_match[1];
 			}
+
 		} else {
 			// Gallery, using `data-gaussholder-id="<id>"`
 			$id = $image[3];
@@ -150,8 +151,8 @@ function mangle_images( $content ) {
 				' src="',
 				),
 			array(
-				'data-originalsrcset="',
-				' ' . implode( ' ', $new_attrs ) . ') data-originalsrc="',
+				' data-originalsrcset="',
+				' ' . implode( ' ', $new_attrs ) . ' data-originalsrc="',
 				),
 			$tag
 		);
