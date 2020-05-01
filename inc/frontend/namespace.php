@@ -58,9 +58,7 @@ function output_script() {
  */
 function mangle_images( $content ) {
 	// Find images
-	$searcher = '#<img[^>]+(?:class=[\'"]([^\'"]*wp-image-(\d+)[^\'"]*)|data-gaussholder-id="(\d+)")[^>]+>#x';
-	$preg_match_result = preg_match_all( $searcher, $content, $images, PREG_SET_ORDER );
-
+	$searcher = '#<img[^>]+(?:class=[\'"]([^\'"]*wp-image-(\d+)[^\'"]*)|data-gaussholder-id="(\d+)")[^>]+>#x';$preg_match_result = preg_match_all( $searcher, $content, $images, PREG_SET_ORDER );
 	/**
 	 * Filter the regexp results when looking for images in a post content.
 	 *
@@ -76,7 +74,7 @@ function mangle_images( $content ) {
 	 *  2 => Attachment ID
 	 * ]
 	 */
-	$preg_match_result = apply_filters_ref_array( 'gaussholder.mangle_images_regexp_results', array( $preg_match_result, &$images, $content, $searcher ) );
+	$preg_match_result = apply_filters_ref_array( 'gaussholder.mangle_images_regexp_results', [ $preg_match_result, &$images, $content, $searcher ] );
 	if ( ! $preg_match_result ) {
 		return $content;
 	}
