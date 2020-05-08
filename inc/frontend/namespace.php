@@ -58,7 +58,8 @@ function output_script() {
  */
 function mangle_images( $content ) {
 	// Find images
-	$searcher = '#<img[^>]+(?:class=[\'"]([^\'"]*wp-image-(\d+)[^\'"]*)|data-gaussholder-id="(\d+)")[^>]+>#x';$preg_match_result = preg_match_all( $searcher, $content, $images, PREG_SET_ORDER );
+	$searcher = '#<img[^>]+(?:class=[\'"]([^\'"]*wp-image-(\d+)[^\'"]*)|data-gaussholder-id="(\d+)")[^>]+>#x';
+	$preg_match_result = preg_match_all( $searcher, $content, $images, PREG_SET_ORDER );
 	/**
 	 * Filter the regexp results when looking for images in a post content.
 	 *
