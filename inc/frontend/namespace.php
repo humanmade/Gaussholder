@@ -130,12 +130,6 @@ function mangle_images( $content ) {
 
 		$new_attrs = array();
 
-		// Replace src with our blank GIF
-		$new_attrs[] = 'src="' . esc_attr( $blank_url ) . '"';
-
-		// Remove srcset
-		$new_attrs[] = 'srcset=""';
-
 		// Add the actual placeholder
 		$placeholder = Gaussholder\get_placeholder( $id, $size );
 		$new_attrs[] = 'data-gaussholder="' . esc_attr( $placeholder ) . '"';
@@ -163,14 +157,8 @@ function mangle_images( $content ) {
 		);
 
 		$mangled_tag = str_replace(
-			array(
-				' srcset="',
-				' src="',
-				),
-			array(
-				' data-originalsrcset="',
-				' ' . implode( ' ', $new_attrs ) . ' data-originalsrc="',
-				),
+			' src="',
+			' ' . implode( ' ', $new_attrs ) . ' src="',
 			$tag
 		);
 

@@ -70,6 +70,10 @@ window.Gaussholder = (function (header) {
 	 * @param {HTMLImageElement} element Element to render placeholder for
 	 */
 	var handleElement = function (element) {
+		if ( element.complete ) {
+			return;
+		}
+
 		if ( ! ( 'gaussholder' in element.dataset ) ) {
 			return;
 		}
@@ -77,127 +81,54 @@ window.Gaussholder = (function (header) {
 		var canvas = document.createElement('canvas');
 		var final = element.dataset.gaussholderSize.split(',');
 
-		// Set the dimensions...
-		element.style.width = final[0] + 'px';
-		element.style.height = final[1] + 'px';
-
-		// ...then recalculate based on what it actually renders as
-		var original = [ final[0], final[1] ];
-		if ( element.width < final[0] ) {
-			// Rescale, keeping the aspect ratio
-			final[0] = element.width;
-			final[1] = final[1] * ( final[0] / original[0] );
-		} else if ( element.height < final[1] ) {
-			// Rescale, keeping the aspect ratio
-			final[1] = element.height;
-			final[0] = final[0] * ( final[1] / original[1] );
-		}
-
-		// Set dimensions, _again_
-		element.style.width = final[0] + 'px';
-		element.style.height = final[1] + 'px';
-
 		render(canvas, element.dataset.gaussholder.split(','), final, function () {
 			// Load in as our background image
-			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
 			element.style.backgroundRepeat = 'no-repeat';
+			element.style.backgroundSize = 'cover';
+			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
 		});
-	};
 
-	var loadOriginal = function (element) {
-		if ( ! ( 'originalsrc' in element.dataset ) && ! ( 'originalsrcset' in element.dataset ) ) {
-			return;
-		}
-
-		var data = element.dataset.gaussholderSize.split(','),
-			radius = parseInt( data[2] );
-
-		// Load our image now
-		var img = new Image();
-
-		if ( element.dataset.originalsrc ) {
-			img.src = element.dataset.originalsrc;
-		}
-		if ( element.dataset.originalsrcset ) {
-			img.srcset = element.dataset.originalsrcset;
-		}
-
-		img.onload = function () {
-			// Filter property to use
-			var filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
-			element.style[ filterProp ] = 'blur(' + radius * 0.5 + 'px)';
-
-			// Ensure blur doesn't bleed past image border
-			element.style.clipPath = 'url(#gaussclip)'; // Current FF
-			element.style.clipPath = 'inset(0)'; // Standard
-			element.style.webkitClipPath = 'inset(0)'; // WebKit
-
-			// Set the actual source
-			element.src = img.src;
-			element.srcset = img.srcset;
-
-			// Cleaning source
-			element.dataset.originalsrc = '';
-			element.dataset.originalsrcset = '';
-
-			// Clear placeholder temporary image
-			// (We do this after setting the source, as doing it before can
-			// cause a tiny flicker)
-			element.style.backgroundImage = '';
-			element.style.backgroundRepeat = '';
-
-			var start = 0;
-			var anim = function (ts) {
-				if ( ! start ) start = ts;
-				var diff = ts - start;
-				if ( diff > fadeDuration ) {
-					element.style[ filterProp ] = '';
-					element.style.clipPath = '';
-					element.style.webkitClipPath = '';
-					return;
-				}
-
-				var effectiveRadius = radius * ( 1 - ( diff / fadeDuration ) );
-
-				element.style[ filterProp ] = 'blur(' + effectiveRadius * 0.5 + 'px)';
-				window.requestAnimationFrame(anim);
-			};
-			window.requestAnimationFrame(anim);
+		element.onload = function () {
+			loadOriginal(element);
 		};
 	};
 
-	var loadLazily = [];
-	var threshold = 1200;
-	var lastRun = 0,
-		loopTimeout = null;
+	var loadOriginal = function (element) {
+		var data = element.dataset.gaussholderSize.split(','),
+			radius = parseInt( data[2] );
 
-	var scrollHandler = function () {
-		var now = Date.now();
-		if ( ( lastRun + 40 ) > now ) {
-			if ( loopTimeout ) {
+		// Filter property to use
+		var filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
+		element.style[ filterProp ] = 'blur(' + radius * 0.5 + 'px)';
+
+		// Ensure blur doesn't bleed past image border
+		element.style.clipPath = 'url(#gaussclip)'; // Current FF
+		element.style.clipPath = 'inset(0)'; // Standard
+		element.style.webkitClipPath = 'inset(0)'; // WebKit
+
+		// Clear placeholder temporary image
+		// (We do this after setting the source, as doing it before can
+		// cause a tiny flicker)
+		element.style.backgroundImage = '';
+		element.style.backgroundRepeat = '';
+
+		var start = 0;
+		var anim = function (ts) {
+			if ( ! start ) start = ts;
+			var diff = ts - start;
+			if ( diff > fadeDuration ) {
+				element.style[ filterProp ] = '';
+				element.style.clipPath = '';
+				element.style.webkitClipPath = '';
 				return;
 			}
-			loopTimeout = window.setTimeout(scrollHandler, 40);
-			return;
-		}
-		lastRun = now;
-		loopTimeout && (loopTimeout = null);
 
-		var next = [];
-		for (var i = loadLazily.length - 1; i >= 0; i--) {
-			var img = loadLazily[i];
-			var shouldShow = img.getBoundingClientRect().top <= ( window.innerHeight + threshold );
-			if ( ! shouldShow ) {
-				next.push(img);
-				continue;
-			}
+			var effectiveRadius = radius * ( 1 - ( diff / fadeDuration ) );
 
-			loadOriginal(img);
-		}
-		loadLazily = next;
-		if (loadLazily.length < 1) {
-			window.removeEventListener('scroll', scrollHandler);
-		}
+			element.style[ filterProp ] = 'blur(' + effectiveRadius * 0.5 + 'px)';
+			window.requestAnimationFrame(anim);
+		};
+		window.requestAnimationFrame(anim);
 	};
 
 	/**
@@ -207,23 +138,7 @@ window.Gaussholder = (function (header) {
 		var images = document.getElementsByTagName('img');
 
 		for (var i = images.length - 1; i >= 0; i--) {
-			var img = images[i];
-
-			// Ensure the blank GIF has loaded first
-			if ( img.complete ) {
-				handleElement(img);
-			} else {
-				img.onload = function () {
-					handleElement(this);
-				}
-			}
-		}
-
-		loadLazily = images;
-		scrollHandler();
-
-		if (loadLazily.length > 0) {
-			window.addEventListener('scroll', scrollHandler);
+			handleElement(images[i]);
 		}
 	};
 
