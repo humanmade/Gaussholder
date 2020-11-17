@@ -1,3 +1,5 @@
+import './stackblur';
+
 window.Gaussholder = (function (header) {
 	// Fade duration in ms when the image loads in.
 	var fadeDuration = 800;
