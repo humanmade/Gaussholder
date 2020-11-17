@@ -1,7 +1,7 @@
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-	entry: [ './assets/gaussholder.js' ],
+	entry: [ './assets/index.js' ],
 	output: {
 		filename: 'gaussholder.min.js',
 	},
