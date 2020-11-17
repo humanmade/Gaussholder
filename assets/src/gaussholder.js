@@ -144,26 +144,22 @@ export default function () {
 	 * Render all placeholders on the page
 	 */
 	return function () {
-		let images = document.getElementsByTagName( 'img' );
+		const images = document.getElementsByTagName( 'img' );
 
-		for ( let i = images.length - 1; i >= 0; i-- ) {
-			let img = images[i];
+		const options = {
+			rootMargin: '1200px'
+		};
 
-			// Ensure the blank GIF has loaded first
-			if ( img.complete ) {
-				handleElement( img );
-			} else {
-				img.onload = function () {
-					handleElement( this );
-				};
-			}
-		}
+		const imagesObserver = new IntersectionObserver( (entries) => {
+			const visibleImages = entries
+				.filter( ( { isIntersecting } ) => isIntersecting === true );
 
-		loadLazily = images;
-		scrollHandler();
+			visibleImages.forEach( ( { target } ) => loadOriginal( target ) );
+		}, options);
 
-		if ( loadLazily.length > 0 ) {
-			window.addEventListener( 'scroll', scrollHandler );
-		}
+		Array.from( images ).forEach( ( img ) => {
+			imagesObserver.observe( img );
+			handleElement( img );
+		})
 	};
 }
