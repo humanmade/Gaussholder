@@ -335,4 +335,6 @@ var StackBlur = (function () {
 	return {
 	    canvasRGB: processCanvasRGB
 	};
-})();
+});
+
+export default StackBlur;

@@ -1,4 +1,4 @@
-import './stackblur';
+import StackBlur from './stackblur';
 
 window.Gaussholder = (function (header) {
 	// Fade duration in ms when the image loads in.
