@@ -33,6 +33,7 @@ export default function () {
 			final[0] = final[0] * ( final[1] / original[1] );
 		}
 
+
 		// Set dimensions, _again_
 		element.style.width = final[0] + 'px';
 		element.style.height = final[1] + 'px';
@@ -61,6 +62,8 @@ export default function () {
 		if ( element.dataset.originalsrcset ) {
 			img.srcset = element.dataset.originalsrcset;
 		}
+
+
 
 		img.onload = function () {
 			// Filter property to use
@@ -140,26 +143,20 @@ export default function () {
 		}
 	};
 
-	/**
-	 * Render all placeholders on the page
-	 */
-	return function () {
-		const images = document.getElementsByTagName( 'img' );
+	const images = document.getElementsByTagName( 'img' );
 
-		const options = {
-			rootMargin: '1200px'
-		};
-
-		const imagesObserver = new IntersectionObserver( (entries) => {
-			const visibleImages = entries
-				.filter( ( { isIntersecting } ) => isIntersecting === true );
-
-			visibleImages.forEach( ( { target } ) => loadOriginal( target ) );
-		}, options);
-
-		Array.from( images ).forEach( ( img ) => {
-			imagesObserver.observe( img );
-			handleElement( img );
-		})
+	const options = {
+		rootMargin: '1px'
 	};
+
+	const imagesObserver = new IntersectionObserver( (entries) => {
+		const visibleImages = entries
+			.filter( ( { isIntersecting } ) => isIntersecting === true );
+		visibleImages.forEach( ( { target } ) => loadOriginal( target ) );
+	}, options);
+
+	Array.from( images ).forEach( ( img ) => {
+		imagesObserver.observe( img );
+		handleElement( img );
+	})
 }
