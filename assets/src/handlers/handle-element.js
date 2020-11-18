@@ -29,7 +29,6 @@ let handleElement = function ( element ) {
 		final[0] = final[0] * ( final[1] / original[1] );
 	}
 
-
 	// Set dimensions, _again_
 	element.style.width = final[0] + 'px';
 	element.style.height = final[1] + 'px';

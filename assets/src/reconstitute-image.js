@@ -1,3 +1,8 @@
+/**
+ * @param {number} buffer Buffer Size.
+ *
+ * @returns {string} Base64 string.
+ */
 function arrayBufferToBase64( buffer ) {
 	let binary = '';
 	let bytes = new Uint8Array( buffer );
@@ -8,6 +13,12 @@ function arrayBufferToBase64( buffer ) {
 	return window.btoa( binary );
 }
 
+/**
+ * @param {*} header Gaussholder header.
+ * @param {Array} image Image node.
+ *
+ * @returns {string} Base 64 string
+ */
 function reconstituteImage( header, image ) {
 	let image_data = image[0],
 		width = parseInt( image[1] ),

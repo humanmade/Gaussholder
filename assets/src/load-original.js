@@ -1,6 +1,11 @@
 // Fade duration in ms when the image loads in.
 const FADE_DURATION = 800;
 
+/**
+ * Load the original image. Triggered once the image is on the viewport.
+ *
+ * @param {Node} element Image element
+ */
 let loadOriginal = function ( element ) {
 	if ( ! ( 'originalsrc' in element.dataset ) && ! ( 'originalsrcset' in element.dataset ) ) {
 		return;
@@ -19,8 +24,9 @@ let loadOriginal = function ( element ) {
 		img.srcset = element.dataset.originalsrcset;
 	}
 
-
-
+	/**
+	 *
+	 */
 	img.onload = function () {
 		// Filter property to use
 		let filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
@@ -46,7 +52,11 @@ let loadOriginal = function ( element ) {
 		element.style.backgroundRepeat = '';
 
 		let start = 0;
-		var anim = function ( ts ) {
+
+		/**
+		 * @param {number} ts Timestamp.
+		 */
+		const anim = function ( ts ) {
 			if ( ! start ) start = ts;
 			let diff = ts - start;
 			if ( diff > FADE_DURATION ) {
