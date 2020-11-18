@@ -116,9 +116,12 @@ export default function () {
 	};
 
 	const imagesObserver = new IntersectionObserver( (entries) => {
-		const visibleImages = entries
-			.filter( ( { isIntersecting } ) => isIntersecting === true );
-		visibleImages.forEach( ( { target } ) => loadOriginal( target ) );
+		const visibleImages = entries.filter( ( { isIntersecting } ) => isIntersecting === true );
+
+		visibleImages.forEach( ( { target } ) => {
+			loadOriginal( target );
+			imagesObserver.unobserve( target );
+		} );
 	}, options);
 
 	Array.from( images ).forEach( ( img ) => {
