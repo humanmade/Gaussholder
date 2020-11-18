@@ -1,6 +1,8 @@
-const intersectionHandler = function( images, loadImageCallback ) {
+import loadImageCallback from '../load-original';
+
+const intersectionHandler = function( images ) {
 	const options = {
-		rootMargin: '1200px'
+		rootMargin: '1200px' // Threshold that Intersection API uses to detect the intersection between the image  and the main element in the page.
 	};
 
 	const imagesObserver = new IntersectionObserver( (entries) => {

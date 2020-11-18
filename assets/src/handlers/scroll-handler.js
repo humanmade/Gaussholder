@@ -1,19 +1,10 @@
-const scrollHandler = function( images, loadImageCallback ) {
-	var loadLazily = images;
-	var threshold = 1200;
-	var lastRun = 0,
-		loopTimeout = null;
-	var now = Date.now();
-	if ( ( lastRun + 40 ) > now ) {
-		if ( loopTimeout ) {
-			return;
-		}
-		loopTimeout = window.setTimeout(scrollHandler, 40);
-		return;
-	}
-	lastRun = now;
-	loopTimeout && (loopTimeout = null);
+import loadImageCallback from '../load-original';
+import throttle from '../throttle';
 
+let loadLazily = [];
+
+const scrollHandler = function() {
+	var threshold = 1200;
 	var next = [];
 	for (var i = loadLazily.length - 1; i >= 0; i--) {
 		var img = loadLazily[i];
@@ -26,9 +17,19 @@ const scrollHandler = function( images, loadImageCallback ) {
 		loadImageCallback(img);
 	}
 	loadLazily = next;
-	if (loadLazily.length < 1) {
-		window.removeEventListener('scroll', scrollHandler);
-	}
 }
 
-export default scrollHandler;
+export default ( images ) => {
+	loadLazily = images;
+
+	const throttledHandler = throttle( scrollHandler, 40 );
+	scrollHandler();
+	window.addEventListener('scroll', throttledHandler );
+
+	const finishedTimeoutCheck = window.setInterval( function() {
+		if ( loadLazily.length < 1 ) {
+			window.removeEventListener('scroll', throttledHandler );
+			window.clearInterval( finishedTimeoutCheck );
+		}
+	}, 1000);
+}
