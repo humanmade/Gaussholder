@@ -109,44 +109,10 @@ export default function () {
 		};
 	};
 
-	let loadLazily = [];
-	let threshold = 1200;
-	let lastRun = 0,
-		loopTimeout = null;
-
-	var scrollHandler = function () {
-		let now = Date.now();
-		if ( ( lastRun + 40 ) > now ) {
-			if ( loopTimeout ) {
-				return;
-			}
-			loopTimeout = window.setTimeout( scrollHandler, 40 );
-			return;
-		}
-		lastRun = now;
-		loopTimeout && ( loopTimeout = null );
-
-		let next = [];
-		for ( let i = loadLazily.length - 1; i >= 0; i-- ) {
-			let img = loadLazily[i];
-			let shouldShow = img.getBoundingClientRect().top <= ( window.innerHeight + threshold );
-			if ( ! shouldShow ) {
-				next.push( img );
-				continue;
-			}
-
-			loadOriginal( img );
-		}
-		loadLazily = next;
-		if ( loadLazily.length < 1 ) {
-			window.removeEventListener( 'scroll', scrollHandler );
-		}
-	};
-
 	const images = document.getElementsByTagName( 'img' );
 
 	const options = {
-		rootMargin: '1px'
+		rootMargin: '1200px'
 	};
 
 	const imagesObserver = new IntersectionObserver( (entries) => {
