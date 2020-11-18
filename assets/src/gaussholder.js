@@ -1,131 +1,21 @@
 import renderImageIntoCanvas from './render-image-into-canvas';
-
-// Fade duration in ms when the image loads in.
-const FADE_DURATION = 800;
+import loadOriginal from './load-original';
+import handleElement from './handlers/handle-element';
+import intersectionHandler from './handlers/intersection-handler';
+import scrollHandler from './handlers/scroll-handler';
 
 export default function () {
-	/**
-	 * Render placeholder for an image
-	 *
-	 * @param {HTMLImageElement} element Element to render placeholder for
-	 */
-	let handleElement = function ( element ) {
-		if ( ! ( 'gaussholder' in element.dataset ) ) {
-			return;
-		}
-
-		let canvas = document.createElement( 'canvas' );
-		let final = element.dataset.gaussholderSize.split( ',' );
-
-		// Set the dimensions...
-		element.style.width = final[0] + 'px';
-		element.style.height = final[1] + 'px';
-
-		// ...then recalculate based on what it actually renders as
-		let original = [ final[0], final[1] ];
-		if ( element.width < final[0] ) {
-			// Rescale, keeping the aspect ratio
-			final[0] = element.width;
-			final[1] = final[1] * ( final[0] / original[0] );
-		} else if ( element.height < final[1] ) {
-			// Rescale, keeping the aspect ratio
-			final[1] = element.height;
-			final[0] = final[0] * ( final[1] / original[1] );
-		}
-
-
-		// Set dimensions, _again_
-		element.style.width = final[0] + 'px';
-		element.style.height = final[1] + 'px';
-
-		renderImageIntoCanvas( canvas, element.dataset.gaussholder.split( ',' ), final, function () {
-			// Load in as our background image
-			element.style.backgroundImage = 'url("' + canvas.toDataURL() + '")';
-			element.style.backgroundRepeat = 'no-repeat';
-		} );
-	};
-
-	let loadOriginal = function ( element ) {
-		if ( ! ( 'originalsrc' in element.dataset ) && ! ( 'originalsrcset' in element.dataset ) ) {
-			return;
-		}
-
-		let data = element.dataset.gaussholderSize.split( ',' ),
-			radius = parseInt( data[2] );
-
-		// Load our image now
-		let img = new Image();
-
-		if ( element.dataset.originalsrc ) {
-			img.src = element.dataset.originalsrc;
-		}
-		if ( element.dataset.originalsrcset ) {
-			img.srcset = element.dataset.originalsrcset;
-		}
-
-
-
-		img.onload = function () {
-			// Filter property to use
-			let filterProp = ( 'webkitFilter' in element.style ) ? 'webkitFilter' : 'filter';
-			element.style[ filterProp ] = 'blur(' + radius * 0.5 + 'px)';
-
-			// Ensure blur doesn't bleed past image border
-			element.style.clipPath = 'url(#gaussclip)'; // Current FF
-			element.style.clipPath = 'inset(0)'; // Standard
-			element.style.webkitClipPath = 'inset(0)'; // WebKit
-
-			// Set the actual source
-			element.src = img.src;
-			element.srcset = img.srcset;
-
-			// Cleaning source
-			element.dataset.originalsrc = '';
-			element.dataset.originalsrcset = '';
-
-			// Clear placeholder temporary image
-			// (We do this after setting the source, as doing it before can
-			// cause a tiny flicker)
-			element.style.backgroundImage = '';
-			element.style.backgroundRepeat = '';
-
-			let start = 0;
-			var anim = function ( ts ) {
-				if ( ! start ) start = ts;
-				let diff = ts - start;
-				if ( diff > FADE_DURATION ) {
-					element.style[ filterProp ] = '';
-					element.style.clipPath = '';
-					element.style.webkitClipPath = '';
-					return;
-				}
-
-				let effectiveRadius = radius * ( 1 - ( diff / FADE_DURATION ) );
-
-				element.style[ filterProp ] = 'blur(' + effectiveRadius * 0.5 + 'px)';
-				window.requestAnimationFrame( anim );
-			};
-			window.requestAnimationFrame( anim );
-		};
-	};
-
 	const images = document.getElementsByTagName( 'img' );
 
-	const options = {
-		rootMargin: '1200px'
-	};
+	if ( typeof IntersectionObserver === 'undefined' ) {
+		// Old browser. Handle events based on scrolling.
+		scrollHandler( images, loadOriginal );
+	}
+	else {
+		// Use the Intersection Observer API.
+		intersectionHandler( images, loadOriginal );
+	}
 
-	const imagesObserver = new IntersectionObserver( (entries) => {
-		const visibleImages = entries.filter( ( { isIntersecting } ) => isIntersecting === true );
-
-		visibleImages.forEach( ( { target } ) => {
-			loadOriginal( target );
-			imagesObserver.unobserve( target );
-		} );
-	}, options);
-
-	Array.from( images ).forEach( ( img ) => {
-		imagesObserver.observe( img );
-		handleElement( img );
-	})
+	// Initialize all images.
+	Array.prototype.slice.call( images ).forEach( handleElement );
 }
