@@ -19,18 +19,6 @@ function bootstrap() {
  * Output the Gaussholder script onto the page.
  */
 function output_script() {
-	// Inline for performance
-	if ( SCRIPT_DEBUG ) {
-		$files = array(
-			Gaussholder\PLUGIN_DIR . '/assets/stackblur.js',
-			Gaussholder\PLUGIN_DIR . '/assets/gaussholder.js',
-		);
-	} else {
-		$files = array(
-			Gaussholder\PLUGIN_DIR . '/assets/gaussholder.min.js',
-		);
-	}
-
 	echo '<script>';
 
 	// Output header onto the page
@@ -38,9 +26,7 @@ function output_script() {
 	$header['header'] = base64_encode( $header['header'] );
 	echo 'var GaussholderHeader = ' . json_encode( $header ) . ";\n";
 
-	foreach ( $files as $file ) {
-		echo file_get_contents( $file ) . "\n";
-	}
+	echo file_get_contents( Gaussholder\PLUGIN_DIR . '/dist/gaussholder.min.js' ) . "\n";
 
 	echo 'Gaussholder();</script>';
 
