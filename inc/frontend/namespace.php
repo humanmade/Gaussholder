@@ -28,7 +28,7 @@ function output_script() {
 
 	echo file_get_contents( Gaussholder\PLUGIN_DIR . '/dist/gaussholder.min.js' ) . "\n";
 
-	echo 'Gaussholder();</script>';
+	echo '</script>';
 
 	// Clipping path for Firefox compatibility on fade in
 	echo '<svg width="0" height="0" style="position: absolute"><clipPath id="gaussclip" clipPathUnits="objectBoundingBox"><rect width="1" height="1"></rect></clipPath></svg>';

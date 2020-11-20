@@ -7,8 +7,9 @@ const { GaussholderHeader } = window;
  * Render an image into a Canvas
  *
  * @param {HTMLCanvasElement} canvas Canvas element to render into
- * @param {list} image 3-tuple of base64-encoded image data, width, height
- * @param {list} final Final width and height
+ * @param {Array} image 3-tuple of base64-encoded image data, width, height
+ * @param {Array} final Final width and height
+ * @param {Function} cb Callback
  */
 function renderImageIntoCanvas( canvas, image, final, cb ) {
 	let ctx = canvas.getContext( '2d' ),
@@ -24,6 +25,9 @@ function renderImageIntoCanvas( canvas, image, final, cb ) {
 
 	let img = new Image();
 	img.src = 'data:image/jpg;base64,' + reconstituteImage( GaussholderHeader, image );
+	/**
+	 *
+	 */
 	img.onload = function () {
 		canvas.width = width;
 		canvas.height = height;

@@ -1,3 +1,3 @@
 import Gaussholder from './src/gaussholder';
 
-window.Gaussholder = Gaussholder();
+document.addEventListener( 'DOMContentLoaded', Gaussholder );
