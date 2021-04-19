@@ -21,7 +21,7 @@ function bootstrap() {
 function display_imagick_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php _e( 'The Imagick PHP extension is not installed. Gaussholder cannot process images without it. Please, install and activate Imagick extension.', 'gaussholder' ); ?></p>
+		<p><?php esc_html_e( 'The Imagick PHP extension is not installed. Gaussholder cannot process images without it. Please, install and activate Imagick extension.', 'gaussholder' ); ?></p>
 	</div>
 	<?php
 }
