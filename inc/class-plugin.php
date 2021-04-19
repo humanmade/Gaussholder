@@ -152,7 +152,13 @@ function generate_placeholders( $attachment_id ) {
 
 	$sizes = get_enabled_sizes();
 	foreach ( $sizes as $size => $radius ) {
-		$data = generate_placeholder( $attachment_id, $size, $radius );
+		try {
+			$data = generate_placeholder( $attachment_id, $size, $radius );
+		} catch ( \ImagickException $e ) {
+			$errors->add( $size, sprintf( 'Unable to generate placeholder for %s (Imagick exception - %s)', $size, $e->getMessage() ) );
+			continue;
+		}
+
 		if ( empty( $data ) ) {
 			$errors->add( $size, sprintf( 'Unable to generate placeholder for %s', $size ) );
 			continue;
