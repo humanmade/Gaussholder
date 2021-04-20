@@ -90,13 +90,13 @@ class CLI_Command extends WP_CLI_Command {
 			) );
 
 			if ( empty( $progress_bar ) ) {
-				$progress_bar = new cli\progress\Bar( sprintf( 'Processing images', absint( $query->found_posts ) ), absint( $query->found_posts ), 100 );
+				$progress_bar = new cli\progress\Bar( sprintf( 'Processing images [Total: %d]', absint( $query->found_posts ) ), absint( $query->found_posts ), 100 );
 				$progress_bar->display();
 			}
 
 			foreach ( $query->posts as $post_id ) {
 
-				$progress_bar->tick();
+				$progress_bar->tick( 1, sprintf( 'Processing images [Total: %d / Processing ID: %d]', absint( $query->found_posts ), $post_id ) );
 
 				$this->process(
 					array( $post_id ),
