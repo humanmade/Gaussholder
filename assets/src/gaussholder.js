@@ -6,7 +6,6 @@ import scrollHandler from './handlers/scroll-handler';
  * Initializes Gaussholder.
  */
 export default function () {
-
 	const images = document.getElementsByTagName( 'img' );
 
 	if ( typeof IntersectionObserver === 'undefined' ) {
