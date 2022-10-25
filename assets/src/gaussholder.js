@@ -1,4 +1,3 @@
-import eventListenerHandler from './handlers/event-listener-handler';
 import handleElement from './handlers/handle-element';
 import intersectionHandler from './handlers/intersection-handler';
 import scrollHandler from './handlers/scroll-handler';
@@ -17,9 +16,6 @@ export default function () {
 		// Use the Intersection Observer API.
 		intersectionHandler( images );
 	}
-
-	// Add the event listener to load images.
-	eventListenerHandler();
 
 	// Initialize all images.
 	Array.prototype.slice.call( images ).forEach( handleElement );
