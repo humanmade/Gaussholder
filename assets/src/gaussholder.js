@@ -1,4 +1,4 @@
-import eventListenerLoadImages from './handlers/event-listener';
+import eventListenerHandler from './handlers/event-listener-handler';
 import handleElement from './handlers/handle-element';
 import intersectionHandler from './handlers/intersection-handler';
 import scrollHandler from './handlers/scroll-handler';
@@ -19,7 +19,7 @@ export default function () {
 	}
 
 	// Add the event listener to load images.
-	eventListenerLoadImages();
+	eventListenerHandler();
 
 	// Initialize all images.
 	Array.prototype.slice.call( images ).forEach( handleElement );
