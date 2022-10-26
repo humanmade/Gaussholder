@@ -1,0 +1,28 @@
+{
+	"name":              "humanmade/gaussholder",
+	"description":       "Fast and lightweight image previews for WordPress",
+	"license":           "GPL-2.0-or-later",
+	"authors":           [
+		{
+			"name":     "Contributors",
+			"homepage": "https://github.com/humanmade/Gaussholder/graphs/contributors"
+		}
+	],
+	"type":              "wordpress-plugin",
+	"minimum-stability": "dev",
+	"prefer-stable":     true,
+	"support":           {
+		"wiki":   "https://github.com/humanmade/Gaussholder/wiki",
+		"source": "https://github.com/humanmade/Gaussholder/releases",
+		"issues": "https://github.com/humanmade/Gaussholder/issues"
+	},
+	"keywords":          [
+		"wordpress",
+		"plugin",
+		"images"
+	],
+	"require":           {
+		"php":                 ">=5.3",
+		"composer/installers": "~1.0"
+	}
+}
