@@ -68,6 +68,8 @@ By default, Gaussholder won't generate any placeholders, and you need to opt-in 
 
 Be aware that for every size you add, a placeholder will be generated and stored in the database. If you have a lot of sizes, this will be a _lot_ of data.
 
+By default Gaussholder is initialized with the `DOMContentLoaded` event. Should you need to reinitialize Gaussholder after the page had loaded, this can be achieved with `GaussHolder();`.
+
 ### Blur radius
 
 The blur radius controls how much blur we use. The image is pre-scaled down by this factor, and this is really the key to how the placeholders work. Increasing radius decreases the required data quadratically: a radius of 2 uses a quarter as much data as the full image; a radius of 8 uses 1/64 the amount of data. (Due to compression, the final result will *not* follow this scaling.)
